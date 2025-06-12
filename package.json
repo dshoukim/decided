@@ -16,7 +16,7 @@
     "drizzle:push": "drizzle-kit push",
     "drizzle:studio": "drizzle-kit studio",
     "drizzle:check": "drizzle-kit check",
-    "test": "node --loader ts-node/esm scripts/test-participant-mapping.ts && node --loader ts-node/esm scripts/test-profile-utils.ts"
+    "test": "node --loader ts-node/esm scripts/test-participant-mapping.ts && node --loader ts-node/esm scripts/test-profile-utils.ts && node --loader ts-node/esm scripts/test-tournament-utils.ts"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",

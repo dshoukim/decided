@@ -58,6 +58,20 @@ export async function POST(
     }
 
     if (room.status !== 'waiting') {
+      if (room.status === 'active' && room.tournamentData) {
+        // Idempotent: return existing tournament details so client can proceed
+        const tournament = room.tournamentData as any
+        return NextResponse.json({
+          success: true,
+          room,
+          tournament: {
+            id: tournament.id,
+            totalRounds: tournament.totalRounds,
+            currentRound: tournament.currentRound,
+            firstRoundMatches: tournament.matches.filter((m: any) => m.roundNumber === 1),
+          }
+        })
+      }
       return NextResponse.json({ 
         success: false, 
         error: `Room is already ${room.status}` 
@@ -115,8 +129,32 @@ export async function POST(
       total_rounds: tournament.totalRounds,
     });
 
-    // TODO: Broadcast the 'tournament_started' event to the room's Realtime channel
-    
+    // Broadcast the 'tournament_started' event to the room's Realtime channel
+    try {
+      const supabaseAdmin = await createClient();
+      const totalMovies = new Set(
+        tournament.matches.flatMap((m) => [m.movieA.id, m.movieB.id])
+      ).size;
+
+      await supabaseAdmin.channel(`room:${roomCode}`).send({
+        type: 'broadcast',
+        event: 'tournament_started',
+        payload: {
+          tournamentId: tournament.id,
+          totalMovies,
+          totalRounds: tournament.totalRounds,
+          matchups: tournament.matches.map((m) => ({
+            matchId: m.matchId,
+            movieA: { id: m.movieA.id, title: m.movieA.title, poster_path: (m.movieA as any).poster_path ?? (m.movieA as any).posterPath },
+            movieB: { id: m.movieB.id, title: m.movieB.title, poster_path: (m.movieB as any).poster_path ?? (m.movieB as any).posterPath },
+            roundNumber: m.roundNumber,
+          })),
+        },
+      });
+    } catch (broadcastError) {
+      console.error('Failed to broadcast tournament_started:', broadcastError);
+    }
+
     return NextResponse.json({ 
       success: true, 
       room: { ...room, status: 'active', tournamentData: tournament },

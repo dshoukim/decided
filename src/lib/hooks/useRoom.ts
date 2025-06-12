@@ -360,6 +360,10 @@ export const useRoom = (roomCode: string | null) => {
       
       if (!response.ok) {
         const error = await response.json();
+        if (response.status === 400 && error.error?.includes('already active')) {
+          // Attempt idempotent fetch: get latest room state
+          mutate();
+        }
         throw new Error(error.message || 'Failed to start tournament');
       }
       
