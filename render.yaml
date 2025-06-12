@@ -8,6 +8,8 @@ services:
     healthCheckPath: "/api/health"
     envVars:
       - key: DATABASE_URL
+        sync: false
+        value: "postgresql://postgres:postgres@localhost:5432/decided"
         # fromDatabase:
         #   name: decided-db
         #   property: connectionString
