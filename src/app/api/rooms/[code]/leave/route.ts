@@ -92,6 +92,7 @@ async function handleLeaveRoom(request: Request, props: { params: Promise<{ code
         type: 'broadcast',
         event: 'user_left',
         payload: {
+          type: 'user_left',
           userId: user.id,
           participantCount: remainingParticipants.length,
           roomStatus: newStatus,

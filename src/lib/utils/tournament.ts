@@ -1,6 +1,7 @@
 import { TournamentMatch } from '@/lib/stores/tournamentStore'
 
 export interface TournamentBroadcastPayload {
+  type: 'tournament_started'
   tournamentId: string
   totalMovies: number
   totalRounds: number
@@ -22,6 +23,7 @@ export function buildTournamentBroadcastPayload(tournament: {
   ).size
 
   return {
+    type: 'tournament_started',
     tournamentId: tournament.id,
     totalMovies,
     totalRounds: tournament.totalRounds,

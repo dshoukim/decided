@@ -118,6 +118,7 @@ async function handleJoinRoom(request: Request, props: { params: Promise<{ code:
           type: 'broadcast',
           event: 'user_joined',
           payload: {
+            type: 'user_joined',
             userId: authenticatedUserId,
             userName: profile.name || profile.username,
             avatarUrl: profile.avatarUrl,
@@ -167,6 +168,7 @@ async function handleJoinRoom(request: Request, props: { params: Promise<{ code:
         type: 'broadcast',
         event: 'user_joined',
         payload: {
+          type: 'user_joined',
           userId: authenticatedUserId,
           userName: profile.name || profile.username,
           avatarUrl: profile.avatarUrl,

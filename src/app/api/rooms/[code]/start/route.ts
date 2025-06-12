@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { getRoomChannelName } from '@/lib/utils/realtime'
+import { buildTournamentBroadcastPayload } from '@/lib/utils/tournament'
 import { db } from '@/db'
 import { rooms, roomParticipants, roomHistory } from '@/db/schema'
 import { eq, sql } from 'drizzle-orm'
@@ -133,24 +134,12 @@ export async function POST(
     // Broadcast the 'tournament_started' event to the room's Realtime channel
     try {
       const supabaseAdmin = await createClient();
-      const totalMovies = new Set(
-        tournament.matches.flatMap((m) => [m.movieA.id, m.movieB.id])
-      ).size;
+      const payload = buildTournamentBroadcastPayload(tournament as any)
 
       await supabaseAdmin.channel(getRoomChannelName(roomCode)).send({
         type: 'broadcast',
         event: 'tournament_started',
-        payload: {
-          tournamentId: tournament.id,
-          totalMovies,
-          totalRounds: tournament.totalRounds,
-          matchups: tournament.matches.map((m) => ({
-            matchId: m.matchId,
-            movieA: { id: m.movieA.id, title: m.movieA.title, poster_path: (m.movieA as any).poster_path ?? (m.movieA as any).posterPath },
-            movieB: { id: m.movieB.id, title: m.movieB.title, poster_path: (m.movieB as any).poster_path ?? (m.movieB as any).posterPath },
-            roundNumber: m.roundNumber,
-          })),
-        },
+        payload,
       });
     } catch (broadcastError) {
       console.error('Failed to broadcast tournament_started:', broadcastError);
