@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { supabase } from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -27,7 +27,7 @@ interface MovieRecommendation {
 
 type RatingType = 'like' | 'dislike' | 'love' | 'not_seen'
 
-export default function MovieRecommendations() {
+function MovieRecommendationsInner() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [recommendations, setRecommendations] = useState<MovieRecommendation[]>([])
@@ -383,4 +383,12 @@ export default function MovieRecommendations() {
       </div>
     </main>
   )
+}
+
+export default function MovieRecommendations() {
+  return (
+    <Suspense fallback={null}>
+      <MovieRecommendationsInner />
+    </Suspense>
+  );
 } 

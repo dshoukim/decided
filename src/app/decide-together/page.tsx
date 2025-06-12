@@ -2,7 +2,7 @@
 
 export const dynamic = 'force-dynamic';
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import QRCode from 'qrcode'
 import { useAuth } from '@/components/providers/auth-provider'
@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/components/ui/use-toast'
 import { Loader2, QrCode, Share2, Users, Film, X } from 'lucide-react'
 
-export default function DecideTogetherPage() {
+function DecideTogetherPageInner() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { user, isLoading: userLoading } = useAuth()
@@ -363,4 +363,12 @@ export default function DecideTogetherPage() {
       )}
     </div>
   )
+}
+
+export default function DecideTogetherPage() {
+  return (
+    <Suspense fallback={null}>
+      <DecideTogetherPageInner />
+    </Suspense>
+  );
 } 
