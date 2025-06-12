@@ -116,20 +116,27 @@ async function handleSubmitRating(request: Request) {
   }
 }
 
-const handleGetWithAuth = withRateLimit(
-  withAuth(handleGetPendingRatings),
-  'api'
-);
-
-const handlePostWithAuth = withRateLimit(
-  withAuth(handleSubmitRating),
-  'api'
-);
+// Basic rate-limit settings for this endpoint (30 requests/min per user/IP)
+const RATE_LIMIT_CONFIG = { windowMs: 60_000, max: 30 } as const;
 
 export async function GET(request: Request) {
-  return handleGetWithAuth(request);
+  // Rate limit first
+  const rateLimitResponse = await withRateLimit(request, RATE_LIMIT_CONFIG, 'pending-ratings');
+  if (rateLimitResponse) return rateLimitResponse;
+
+  // Auth check
+  const authResult = await withAuth(request);
+  if (!authResult.success) return authResult.response as Response;
+
+  return handleGetPendingRatings(request);
 }
 
 export async function POST(request: Request) {
-  return handlePostWithAuth(request);
+  const rateLimitResponse = await withRateLimit(request, RATE_LIMIT_CONFIG, 'pending-ratings');
+  if (rateLimitResponse) return rateLimitResponse;
+
+  const authResult = await withAuth(request);
+  if (!authResult.success) return authResult.response as Response;
+
+  return handleSubmitRating(request);
 } 
