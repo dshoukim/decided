@@ -3,6 +3,7 @@ import { db } from '@/db'
 import { rooms, roomParticipants, users } from '@/db/schema'
 import { eq, and } from 'drizzle-orm'
 import type { User } from '@supabase/supabase-js'
+import { getMissingProfileFields } from '@/lib/utils/profile'
 
 export class AuthMiddleware {
   
@@ -51,19 +52,14 @@ export class AuthMiddleware {
   
   static async validateProfileComplete(userId: string): Promise<{ complete: boolean; missing: string[] }> {
     const user = await db.query.users.findFirst({
-      where: eq(rooms.ownerId, userId), // Using available import
+      where: eq(users.id, userId),
     })
     
     if (!user) {
       return { complete: false, missing: ['user profile'] }
     }
     
-    const missing: string[] = []
-    
-    if (!user.name) missing.push('name')
-    if (!user.selectedGenres?.length) missing.push('genre preferences')
-    if (!user.streamingServices?.length) missing.push('streaming services')
-    
+    const missing = getMissingProfileFields(user)
     return { complete: missing.length === 0, missing }
   }
   
