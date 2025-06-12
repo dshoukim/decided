@@ -34,7 +34,7 @@ services:
       - key: NEXT_PUBLIC_POSTHOG_KEY
         sync: false
       - key: OPENAI_API_KEY
-        sync:false
+        sync: false
 
     autoDeploy: true
 
