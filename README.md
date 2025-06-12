@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Decided - Real-time Collaborative Movie Selection
 
-## Getting Started
+A Next.js application for real-time, collaborative movie selection using a tournament-style system.
 
-First, run the development server:
+## Features
 
+- 🔐 Google OAuth authentication via Supabase
+- 👥 Real-time collaborative rooms for 2 participants
+- 🎬 Tournament-style movie selection from merged watchlists
+- 🏆 ELO-based rating system for movie preferences
+- 💾 Data persistence to Supabase tables
+- 🎨 Modern UI with Tailwind CSS and shadcn/ui
+- 📱 Mobile-first responsive design
+- 🔄 Real-time synchronization with optimistic UI updates
+
+## Prerequisites
+
+Before running this application, make sure you have:
+
+- Node.js 18+ installed
+- A Supabase project set up
+- Google OAuth configured in your Supabase project
+
+## Installation
+
+1. Clone and navigate to the project:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd decided
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. The environment variables are already configured in `.env.local`.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Running the Application
 
-## Learn More
+1. Start the development server:
+```bash
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+2. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## How It Works
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Core Feature: Decided
 
-## Deploy on Vercel
+1. **Room Creation**: A user initiates a session, creating a unique room code.
+2. **Invitation**: The user shares the code or a QR code with a friend.
+3. **Lobby**: Both users join the room and can see each other in the lobby.
+4. **Tournament**: The tournament starts, merging movies from both users' watchlists.
+5. **Pairwise Comparison**: Each user is presented with pairs of movies and chooses their preference.
+6. **Winner**: After several rounds, a winning movie is chosen and added to both users' watchlists.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Key Components
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- **`src/app/decide-together`**: Main entry point and room management UI.
+- **`src/components/decide-together`**: Components for the tournament interface.
+- **`src/lib/hooks/useRoom.ts`**: Hook for managing room state and real-time events.
+- **`src/lib/stores/tournamentStore.ts`**: Zustand store for centralized state management.
+- **`src/lib/tournament-engine.ts`**: Core logic for generating tournament brackets.
+
+## Technology Stack
+
+- **Next.js 15** - React framework with App Router
+- **Supabase** - Backend as a Service for auth, database, and real-time
+- **Drizzle ORM** - TypeScript ORM for database access
+- **Zustand** - State management
+- **Tailwind CSS** - Utility-first CSS framework
+- **TypeScript** - Type safety and better developer experience
+
+## Supabase Configuration
+
+Make sure your Supabase project is configured with:
+
+1. **Google OAuth Provider** enabled in Authentication settings
+2. **Authorized redirect URLs** including your development and production URLs
+3. **Users table** created with the schema above
+
+## Building for Production
+
+```bash
+npm run build
+npm start
+```
+
+## Security Notes
+
+- Environment variables are properly configured for client-side usage
+- Authentication state is managed securely with Supabase
+- Database operations use Row Level Security (RLS) policies
+- OAuth redirect URLs should be properly configured in production
