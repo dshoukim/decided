@@ -1,0 +1,20 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Project Structure Overview
+
+The application is a Next.js project located in the root directory. Key entry points and directories:
+
+- Next.js configuration is in [next.config.ts](mdc:next.config.ts)
+- The main application code is under the [src](mdc:src) directory.
+  - API routes live in [src/app/api](mdc:src/app/api) following the App Router conventions (e.g., [rooms/route.ts](mdc:src/app/api/rooms/route.ts)).
+  - Client and server pages are in [src/app](mdc:src/app), such as [page.tsx](mdc:src/app/page.tsx) for the home page.
+  - Shared React components live in [src/components](mdc:src/components).
+  - Database schema and queries are defined with Drizzle ORM inside [src/db](mdc:src/db).
+  - Utility libraries and hooks are stored in [src/lib](mdc:src/lib), e.g., Supabase helpers in [supabase.ts](mdc:src/lib/supabase.ts).
+
+- Project dependencies and scripts are defined in [package.json](mdc:package.json).
+
+Use this map to quickly locate core files when navigating or editing the codebase.

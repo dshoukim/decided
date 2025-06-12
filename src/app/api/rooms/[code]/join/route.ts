@@ -71,9 +71,13 @@ async function handleJoinRoom(request: Request, props: { params: Promise<{ code:
     // Check if user is already in the room
     const existingParticipant = participants.find(p => p.userId === authenticatedUserId)
     if (existingParticipant) {
-      return NextResponse.json({ 
-        error: 'You are already in this room' 
-      }, { status: 400 })
+      // User is already an active participant – treat as a successful join
+      return NextResponse.json({
+        success: true,
+        roomId: currentRoom.id,
+        participantCount: participants.length,
+        message: 'Already joined'
+      })
     }
 
     // Check profile completeness

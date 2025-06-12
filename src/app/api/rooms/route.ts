@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { customAlphabet } from 'nanoid'
 import { db } from '@/db'
-import { rooms } from '@/db/schema'
+import { rooms, roomParticipants } from '@/db/schema'
 
 const nanoid = customAlphabet('0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ', 6)
 
@@ -40,6 +40,7 @@ export async function POST(request: Request) {
   try {
     const roomCode = nanoid()
     
+    // 1. Create the room
     const newRoom = await db
       .insert(rooms)
       .values({
@@ -47,6 +48,15 @@ export async function POST(request: Request) {
         ownerId: authenticatedUserId,
       })
       .returning()
+
+    // 2. Automatically add the owner as the first (active) participant
+    await db
+      .insert(roomParticipants)
+      .values({
+        roomId: newRoom[0].id,
+        userId: authenticatedUserId,
+        isActive: true,
+      })
 
     return NextResponse.json({ success: true, room: newRoom[0] })
   } catch (error) {
