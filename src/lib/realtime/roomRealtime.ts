@@ -17,7 +17,7 @@ export const RoomMessageSchema = z.discriminatedUnion('type', [
   }),
   z.object({
     type: z.literal('tournament_started'),
-    tournamentId: z.string().uuid(),
+    tournamentId: z.string(),
     totalMovies: z.number(),
     totalRounds: z.number(),
     matchups: z.array(z.object({
