@@ -9,9 +9,6 @@ services:
     envVars:
       - key: DATABASE_URL
         sync: false
-        # fromDatabase:
-        #   name: decided-db
-        #   property: connectionString
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -38,27 +35,3 @@ services:
         sync: false
 
     autoDeploy: true
-
-# databases:
-#   - name: decided-db
-#     plan: free
-#     postgresMajorVersion: 15
-
-# previews:
-#   generation: automatic
-#   services:
-#     - name: decided-preview
-#       type: web
-#       plan: starter
-#       buildCommand: "npm install && npm run build"
-#       startCommand: "npm start"
-#       preDeployCommand: "npx drizzle-kit push"
-#       envVars:
-#         - key: DATABASE_URL
-#           fromDatabase:
-#             name: decided-db-preview
-#             property: connectionString
-#   databases:
-#     - name: decided-db-preview
-#       plan: starter
-#       postgresMajorVersion: 15 
