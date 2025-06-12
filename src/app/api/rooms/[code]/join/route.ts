@@ -30,6 +30,21 @@ async function handleJoinRoom(request: Request, props: { params: Promise<{ code:
 
     const roomCode = params.code
 
+    // Fetch user profile (for validation and broadcast)
+    const userProfile = await db
+      .select()
+      .from(users)
+      .where(eq(users.id, authenticatedUserId))
+      .limit(1)
+
+    if (userProfile.length === 0) {
+      return NextResponse.json({ 
+        error: 'User profile not found' 
+      }, { status: 400 })
+    }
+
+    const profile = userProfile[0]
+
     // Get the room
     const room = await db
       .select()
@@ -50,7 +65,7 @@ async function handleJoinRoom(request: Request, props: { params: Promise<{ code:
       }, { status: 400 })
     }
 
-    // Check current participant count
+    // Check current participant count (active participants)
     const participants = await db
       .select()
       .from(roomParticipants)
@@ -61,39 +76,70 @@ async function handleJoinRoom(request: Request, props: { params: Promise<{ code:
         )
       )
 
+    // Check if user already has a participant record in this room (active or inactive)
+    const existingParticipantRecord = await db
+      .select()
+      .from(roomParticipants)
+      .where(
+        and(
+          eq(roomParticipants.roomId, currentRoom.id),
+          eq(roomParticipants.userId, authenticatedUserId)
+        )
+      )
+      .limit(1)
+
+    if (existingParticipantRecord.length) {
+      const record = existingParticipantRecord[0]
+      // If they are already active, treat as already joined (falls back to logic below)
+      if (!record.leftAt) {
+        return NextResponse.json({
+          success: true,
+          roomId: currentRoom.id,
+          participantCount: participants.length,
+          message: 'Already joined'
+        })
+      }
+
+      // Reactivate the participant (they had left before)
+      await db
+        .update(roomParticipants)
+        .set({
+          leftAt: null,
+          isActive: true,
+          joinedAt: new Date()
+        })
+        .where(eq(roomParticipants.id, record.id))
+
+      // Broadcast re-join event
+      const supabaseAdmin = await createClient()
+      await supabaseAdmin.channel(`room:${roomCode}`)
+        .send({
+          type: 'broadcast',
+          event: 'user_joined',
+          payload: {
+            userId: authenticatedUserId,
+            userName: profile.name || profile.username,
+            avatarUrl: profile.avatarUrl,
+            participantCount: participants.length + 1,
+            roomStatus: currentRoom.status,
+            rejoined: true
+          }
+        })
+
+      return NextResponse.json({
+        success: true,
+        roomId: currentRoom.id,
+        participantCount: participants.length + 1,
+        message: 'Rejoined'
+      })
+    }
+
     // Validate participant count (max 2)
     if (participants.length >= 2) {
       return NextResponse.json({ 
         error: 'Room is full - maximum 2 participants allowed' 
       }, { status: 400 })
     }
-
-    // Check if user is already in the room
-    const existingParticipant = participants.find(p => p.userId === authenticatedUserId)
-    if (existingParticipant) {
-      // User is already an active participant – treat as a successful join
-      return NextResponse.json({
-        success: true,
-        roomId: currentRoom.id,
-        participantCount: participants.length,
-        message: 'Already joined'
-      })
-    }
-
-    // Check profile completeness
-    const userProfile = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, authenticatedUserId))
-      .limit(1)
-
-    if (userProfile.length === 0) {
-      return NextResponse.json({ 
-        error: 'User profile not found' 
-      }, { status: 400 })
-    }
-
-    const profile = userProfile[0]
 
     // Check if user has selected genres and streaming services
     if (!profile.selectedGenres || profile.selectedGenres.length === 0 || 
@@ -121,6 +167,8 @@ async function handleJoinRoom(request: Request, props: { params: Promise<{ code:
         event: 'user_joined',
         payload: {
           userId: authenticatedUserId,
+          userName: profile.name || profile.username,
+          avatarUrl: profile.avatarUrl,
           participantCount: participants.length + 1,
           roomStatus: currentRoom.status
         }

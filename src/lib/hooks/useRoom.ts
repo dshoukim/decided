@@ -7,6 +7,7 @@ import { RoomRealtimeManager } from '@/lib/realtime/roomRealtime';
 import { classifyError, retryWithBackoff } from '@/lib/errors/errorClassification';
 import { useUser } from '@/lib/hooks/useUser';
 import { useToast } from '@/components/ui/use-toast';
+import { mapApiParticipantsToStore } from '@/lib/utils/participants'
 
 // Global map to track active connections per room
 const activeConnections = new Map<string, RoomRealtimeManager>();
@@ -42,7 +43,10 @@ export const useRoom = (roomCode: string | null) => {
       onSuccess: (data) => {
         if (data.room) {
           store.setRoom(data.room);
-          store.setParticipants(data.participants || []);
+
+          // Map API participants to store participant structure
+          const mappedParticipants = mapApiParticipantsToStore(data.room.participants || []);
+          store.setParticipants(mappedParticipants);
           setRetryCount(0); // Reset retry count on success
         }
       },
