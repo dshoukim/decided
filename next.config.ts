@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import path from 'path';
 
 const nextConfig: NextConfig = {
   images: {
@@ -28,6 +29,14 @@ const nextConfig: NextConfig = {
       'pluto.tv',
       'www.crackle.com'
     ],
+  },
+  webpack: (config) => {
+    // Ensure the `@/` alias points to the `src` directory for both JS and TS build pipelines
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      '@': path.resolve(__dirname, 'src'),
+    };
+    return config;
   },
 };
 
