@@ -1,0 +1,60 @@
+services:
+  - type: web
+    name: decided
+    env: node
+    plan: free
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm start"
+    healthCheckPath: "/api/health"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: decided-db
+          property: connectionString
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: NEXT_PUBLIC_POSTHOG_KEY
+        sync: false
+      - key: NEXT_PUBLIC_POSTHOG_HOST
+        sync: false
+      - key: NODE_ENV
+        value: production
+
+  - type: pserv
+    name: decided-db
+    env: postgres
+    plan: free
+    postgres:
+      version: 15
+    disk:
+      sizeGB: 1
+    
+previews:
+  - name: preview
+    sync: true
+    source: pull-request
+    previewsEnabled: true
+    services:
+      - name: decided-preview
+        type: web
+        buildCommand: "npm install && npm run build"
+        startCommand: "npm start"
+        envVars:
+          - fromService: decided
+            envVar: DATABASE_URL
+            name: decided-db-preview
+            type: pserv
+            plan: free
+            postgres:
+              version: 15
+            disk:
+              sizeGB: 1
+    
+    preDeploy:
+      - command: "npm install && npx drizzle-kit push" 
