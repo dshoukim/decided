@@ -26,33 +26,27 @@ services:
       - key: NODE_ENV
         value: production
 
-  - type: pserv
-    name: decided-db
-    env: postgres
-    plan: free
-    disk:
-      sizeGB: 1
-    
 databases:
   - name: decided-db
-    postgres:
-      version: 15
+    plan: free
+    postgresMajorVersion: 15
 
 previews:
-  - fromPullRequest:
-      enabled: true
-      services:
-        - name: decided-preview
-          type: web
-          buildCommand: "npm install && npm run build"
-          startCommand: "npm start"
-          preDeployCommand: "npx drizzle-kit push"
-          envVars:
-            - key: DATABASE_URL
-              fromDatabase:
-                name: decided-db-preview
-                property: connectionString
-      databases:
-        - name: decided-db-preview
-          postgres:
-            version: 15 
+  fromPullRequest:
+    enabled: true
+    services:
+      - name: decided-preview
+        type: web
+        plan: free
+        buildCommand: "npm install && npm run build"
+        startCommand: "npm start"
+        preDeployCommand: "npx drizzle-kit push"
+        envVars:
+          - key: DATABASE_URL
+            fromDatabase:
+              name: decided-db-preview
+              property: connectionString
+    databases:
+      - name: decided-db-preview
+        plan: free
+        postgresMajorVersion: 15 
