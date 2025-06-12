@@ -32,7 +32,7 @@ databases:
     postgresMajorVersion: 15
 
 previews:
-  fromPullRequest:
+  pullRequestPreviews:
     enabled: true
     services:
       - name: decided-preview
