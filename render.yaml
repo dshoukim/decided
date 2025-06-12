@@ -27,10 +27,10 @@ services:
         value: production
     autoDeploy: true
 
-databases:
-  - name: decided-db
-    plan: free
-    postgresMajorVersion: 15
+# databases:
+#   - name: decided-db
+#     plan: free
+#     postgresMajorVersion: 15
 
 # previews:
 #   generation: automatic
