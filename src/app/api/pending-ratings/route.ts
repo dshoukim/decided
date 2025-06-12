@@ -126,4 +126,10 @@ const handlePostWithAuth = withRateLimit(
   'api'
 );
 
-export { handleGetWithAuth as GET, handlePostWithAuth as POST }; 
+export async function GET(request: Request) {
+  return handleGetWithAuth(request);
+}
+
+export async function POST(request: Request) {
+  return handlePostWithAuth(request);
+} 
