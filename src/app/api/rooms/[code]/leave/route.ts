@@ -6,6 +6,7 @@ import { RoomStateManager, RoomStatus } from '@/lib/room-state-manager'
 import { db } from '@/db'
 import { rooms, roomParticipants } from '@/db/schema'
 import { eq, and, isNull } from 'drizzle-orm'
+import { getRoomChannelName } from '@/lib/utils/realtime'
 
 async function handleLeaveRoom(request: Request, props: { params: Promise<{ code: string }> }) {
   try {
@@ -86,7 +87,7 @@ async function handleLeaveRoom(request: Request, props: { params: Promise<{ code
     }
 
     // 4. Broadcast user_left via Realtime
-    await supabase.channel(`room:${roomCode}`)
+    await supabase.channel(getRoomChannelName(roomCode))
       .send({
         type: 'broadcast',
         event: 'user_left',

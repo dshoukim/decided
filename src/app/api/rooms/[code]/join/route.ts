@@ -6,6 +6,7 @@ import { RoomStateManager } from '@/lib/room-state-manager'
 import { db } from '@/db'
 import { rooms, roomParticipants, users } from '@/db/schema'
 import { eq, and, isNull } from 'drizzle-orm'
+import { getRoomChannelName } from '@/lib/utils/realtime'
 
 async function handleJoinRoom(request: Request, props: { params: Promise<{ code: string }> }) {
   try {
@@ -112,7 +113,7 @@ async function handleJoinRoom(request: Request, props: { params: Promise<{ code:
 
       // Broadcast re-join event
       const supabaseAdmin = await createClient()
-      await supabaseAdmin.channel(`room:${roomCode}`)
+      await supabaseAdmin.channel(getRoomChannelName(roomCode))
         .send({
           type: 'broadcast',
           event: 'user_joined',
@@ -161,7 +162,7 @@ async function handleJoinRoom(request: Request, props: { params: Promise<{ code:
 
     // Broadcast join event via Realtime
     const supabaseAdmin = await createClient()
-    await supabaseAdmin.channel(`room:${roomCode}`)
+    await supabaseAdmin.channel(getRoomChannelName(roomCode))
       .send({
         type: 'broadcast',
         event: 'user_joined',

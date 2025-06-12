@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { getRoomChannelName } from '@/lib/utils/realtime'
 import { db } from '@/db'
 import { rooms, roomParticipants, roomHistory } from '@/db/schema'
 import { eq, sql } from 'drizzle-orm'
@@ -136,7 +137,7 @@ export async function POST(
         tournament.matches.flatMap((m) => [m.movieA.id, m.movieB.id])
       ).size;
 
-      await supabaseAdmin.channel(`room:${roomCode}`).send({
+      await supabaseAdmin.channel(getRoomChannelName(roomCode)).send({
         type: 'broadcast',
         event: 'tournament_started',
         payload: {
