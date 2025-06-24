@@ -94,13 +94,26 @@ export async function POST(
         const channelName = `room-${roomCode}`;
         await supabase.channel(channelName).send({
           type: 'broadcast',
-          event: 'tournament_updated',
+          event: 'tournament_started',
           payload: {
             type: 'tournament_started',
-            status: tournamentState.status,
-            currentRound: tournamentState.currentRound,
+            tournamentId: roomId,
+            totalMovies: tournamentState.allMovies.length,
             totalRounds: tournamentState.totalRounds,
-            matchCount: tournamentState.currentMatches.length
+            matchups: tournamentState.currentMatches.map(match => ({
+              matchId: match.matchId,
+              roundNumber: match.roundNumber,
+              movieA: {
+                id: match.movieA.id,
+                title: match.movieA.title,
+                poster_path: match.movieA.posterPath
+              },
+              movieB: {
+                id: match.movieB.id,
+                title: match.movieB.title,
+                poster_path: match.movieB.posterPath
+              }
+            }))
           }
         });
 
@@ -126,15 +139,16 @@ export async function POST(
         const channelName = `room-${roomCode}`;
         await supabase.channel(channelName).send({
           type: 'broadcast',
-          event: 'tournament_updated',
+          event: 'pick_made',
           payload: {
             type: 'pick_made',
             userId: user.id,
             matchId: action.matchId,
-            selectedMovieId: action.selectedMovieId,
-            status: tournamentState.status,
-            currentRound: tournamentState.currentRound,
-            userProgress: tournamentState.userProgress
+            roundNumber: tournamentState.currentRound,
+            progress: {
+              userPicks: tournamentState.userProgress?.completedPicks || 0,
+              totalPicks: tournamentState.userProgress?.totalPicks || 0
+            }
           }
         });
 
@@ -142,11 +156,11 @@ export async function POST(
         if (tournamentState.status === 'completed') {
           await supabase.channel(channelName).send({
             type: 'broadcast',
-            event: 'tournament_updated',
+            event: 'winner_selected',
             payload: {
-              type: 'tournament_completed',
-              winnerMovieId: tournamentState.winnerMovieId,
-              winnerTitle: tournamentState.winnerTitle,
+              type: 'winner_selected',
+              winnerMovieId: tournamentState.winnerMovieId!,
+              winnerTitle: tournamentState.winnerTitle!,
               winnerPosterPath: tournamentState.winnerPosterPath
             }
           });

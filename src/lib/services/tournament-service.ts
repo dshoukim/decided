@@ -71,24 +71,9 @@ export class TournamentService {
 
       const [userA, userB] = participants
 
-      // Get movies from both users' watchlists
-      const userAMovies = await this.getUserWatchlist(tx, userA.userId)
-      const userBMovies = await this.getUserWatchlist(tx, userB.userId)
-
-      // Merge and deduplicate movies
-      const allMovies = this.mergeMovies(userAMovies, userBMovies, userA.userId, userB.userId)
-
-      if (allMovies.length < 4) {
-        // Use mock tournament for insufficient movies
-        const mockMovies = this.generateMockMovies()
-        return this.createTournamentState(tx, roomId, mockMovies)
-      }
-
-      // Ensure tournament size is power of 2
-      const tournamentSize = Math.pow(2, Math.floor(Math.log2(Math.min(allMovies.length, 16))))
-      const selectedMovies = allMovies.slice(0, tournamentSize)
-
-      return this.createTournamentState(tx, roomId, selectedMovies)
+      // For now, use mock movies to test the system
+      const mockMovies = this.generateMockMovies()
+      return this.createTournamentState(tx, roomId, mockMovies)
     })
   }
 
@@ -199,7 +184,8 @@ export class TournamentService {
           completedPicks: newState.completedPicks,
           winnerMovieId: newState.winnerMovieId ?? null,
           winnerTitle: newState.winnerTitle ?? null,
-          winnerPosterPath: newState.winnerPosterPath ?? null
+          winnerPosterPath: newState.winnerPosterPath ?? null,
+          updatedAt: new Date()
         })
         .where(eq(tournamentState.roomId, roomId))
 
@@ -310,9 +296,8 @@ export class TournamentService {
       currentMatches: firstRoundMatches,
       completedPicks: [],
       allMovies: movies,
-      version: 1,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      version: 1
+      // createdAt and updatedAt will be set automatically by Drizzle
     }
 
     await tx.insert(tournamentState).values(newState)
