@@ -29,9 +29,9 @@ export function TournamentMovieCard({
       onClick={!disabled ? onSelect : undefined}
     >
       <div className="aspect-[2/3] relative">
-        {movie.poster_path ? (
+        {movie.posterPath ? (
           <img
-            src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+            src={`https://image.tmdb.org/t/p/w500${movie.posterPath}`}
             alt={movie.title}
             className="w-full h-full object-cover"
           />

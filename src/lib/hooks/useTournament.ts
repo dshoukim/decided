@@ -1,7 +1,7 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
-import { useTournamentStore, selectCurrentMatch, selectTournamentProgress } from '@/lib/stores/tournamentStore';
+import { useCallback, useEffect, useState, useMemo, useRef } from 'react';
+import { useTournamentStore } from '@/lib/stores/tournamentStore';
 import { classifyError, retryWithBackoff } from '@/lib/errors/errorClassification';
 import { TournamentMatch, TournamentMovie } from '@/lib/stores/tournamentStore';
 
@@ -15,35 +15,134 @@ interface BracketPick {
 }
 
 export const useTournament = (roomCode: string | null) => {
-  const store = useTournamentStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [currentMatchIndex, setCurrentMatchIndex] = useState(0);
+  const [serverCurrentMatch, setServerCurrentMatch] = useState<TournamentMatch | null>(null);
+  const submittingMatchIdRef = useRef<string | null>(null);
+  const lastRoundRef = useRef<number>(1);
 
-  // Get current match from store
+  // Use individual stable selectors instead of object creation
   const tournament = useTournamentStore(state => state.tournament);
   const currentRound = useTournamentStore(state => state.currentRound);
-  const progress = useTournamentStore(selectTournamentProgress);
-  
-  // Find current match for user
-  const getCurrentMatch = useCallback((): TournamentMatch | null => {
-    if (!tournament) return null;
+  const room = useTournamentStore(state => state.room);
+  const error = useTournamentStore(state => state.error);
+  const isLoading = useTournamentStore(state => state.isLoading);
+  const connectionStatus = useTournamentStore(state => state.connectionStatus);
+  const userProgress = useTournamentStore(state => state.userProgress);
+  const partnerProgress = useTournamentStore(state => state.partnerProgress);
+
+  // Get actions directly to keep them stable
+  const setError = useTournamentStore((state: any) => state.setError);
+  const clearError = useTournamentStore((state: any) => state.clearError);
+
+  // Fetch current match from server when tournament or round changes
+  useEffect(() => {
+    const fetchCurrentMatch = async () => {
+      if (!roomCode || !tournament || room?.status !== 'active') {
+        console.log('🚫 [CLIENT] Skipping current-match fetch:', {
+          roomCode: !!roomCode,
+          tournament: !!tournament,
+          roomStatus: room?.status
+        });
+        setServerCurrentMatch(null);
+        return;
+      }
+
+      console.log('🔄 [CLIENT] Fetching current match:', {
+        roomCode,
+        tournamentId: tournament.id,
+        currentRound,
+        userProgress: userProgress.completedPicks,
+        apiUrl: `/api/rooms/${roomCode}/current-match`
+      });
+
+      try {
+        const response = await fetch(`/api/rooms/${roomCode}/current-match`);
+        
+        console.log('📡 [CLIENT] Current-match API response:', {
+          ok: response.ok,
+          status: response.status,
+          statusText: response.statusText,
+          headers: Object.fromEntries(response.headers.entries())
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          setServerCurrentMatch(data.currentMatch);
+          console.log('✅ [CLIENT] Fetched current match from server:', {
+            matchId: data.currentMatch?.matchId,
+            completedCount: data.completedCount,
+            totalCount: data.totalCount,
+            message: data.message,
+            debug: data.debug
+          });
+        } else {
+          const errorData = await response.json().catch(() => null);
+          console.error('❌ [CLIENT] Failed to fetch current match:', {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorData
+          });
+          setServerCurrentMatch(null);
+        }
+      } catch (error) {
+        console.error('❌ [CLIENT] Error fetching current match:', {
+          error: error.message,
+          stack: error.stack,
+          roomCode,
+          apiUrl: `/api/rooms/${roomCode}/current-match`
+        });
+        setServerCurrentMatch(null);
+      }
+    };
+
+    fetchCurrentMatch();
+  }, [roomCode, tournament?.id, currentRound, userProgress.completedPicks]);
+
+  // Use server-fetched current match (this fixes the bug!)
+  const currentMatch = useMemo((): TournamentMatch | null => {
+    console.log('Using server-fetched current match:', {
+      serverMatch: serverCurrentMatch?.matchId || null,
+      userProgress: userProgress.completedPicks,
+      currentRound
+    });
+    return serverCurrentMatch;
+  }, [serverCurrentMatch, userProgress, currentRound]);
+
+  // Stable computed values - use individual memos to prevent object creation
+  const isWaitingForPartner = useMemo(() => {
+    if (!tournament || !userProgress || !partnerProgress) return false;
     
-    const currentRoundMatches = tournament.matches.filter(
-      m => m.roundNumber === currentRound
-    );
+    const userCompletedRound = userProgress.completedPicks >= 
+      Math.ceil(tournament.matches.filter((m: TournamentMatch) => m.roundNumber === currentRound).length / 2);
     
-    // Find first unplayed match (this would be determined by checking picks)
-    // For now, use index-based approach
-    if (currentMatchIndex < currentRoundMatches.length) {
-      return currentRoundMatches[currentMatchIndex];
+    const partnerCompletedRound = partnerProgress.completedPicks >= 
+      Math.ceil(tournament.matches.filter((m: TournamentMatch) => m.roundNumber === currentRound).length / 2);
+    
+    return userCompletedRound && !partnerCompletedRound;
+  }, [tournament, currentRound, userProgress, partnerProgress]);
+
+  const isTournamentComplete = useMemo(() => room?.status === 'completed', [room?.status]);
+
+  const totalRounds = useMemo(() => tournament?.totalRounds || 0, [tournament?.totalRounds]);
+
+  const finalPicks = useMemo(() => {
+    if (!tournament || currentRound !== tournament.totalRounds) return null;
+    
+    return {
+      userPick: null,
+      partnerPick: null,
+    };
+  }, [tournament, currentRound]);
+
+  // Reset state when round changes
+  useEffect(() => {
+    if (currentRound !== lastRoundRef.current) {
+      console.log(`Round changed from ${lastRoundRef.current} to ${currentRound}`);
+      lastRoundRef.current = currentRound;
     }
-    
-    return null;
-  }, [tournament, currentRound, currentMatchIndex]);
+  }, [currentRound]);
 
-  const currentMatch = getCurrentMatch();
-
-  // Submit bracket pick - updated to accept pick object
+  // Submit bracket pick - memoized to prevent re-renders
   const submitPick = useCallback(async (pick: {
     matchId: string;
     selectedMovieId: number;
@@ -51,8 +150,15 @@ export const useTournament = (roomCode: string | null) => {
   }) => {
     if (!roomCode || !currentMatch || isSubmitting) return;
     
+    // Prevent duplicate submissions for the same match
+    if (submittingMatchIdRef.current === pick.matchId) {
+      console.log('Preventing duplicate submission for match:', pick.matchId);
+      return;
+    }
+    
+    submittingMatchIdRef.current = pick.matchId;
     setIsSubmitting(true);
-    store.clearError();
+    clearError();
     
     const fullPick: BracketPick = {
       matchId: pick.matchId,
@@ -80,16 +186,10 @@ export const useTournament = (roomCode: string | null) => {
       }
       
       const data = await response.json();
+      console.log('Pick submitted successfully:', data);
       
-      // Move to next match
-      setCurrentMatchIndex(prev => prev + 1);
-      
-      // Check if round is complete
-      if (data.nextRoundMatches) {
-        // New round started
-        setCurrentMatchIndex(0);
-        store.updateCurrentRound(currentRound + 1);
-      }
+      // Real-time events will handle round advancement and match progression
+      // The API will broadcast pick_made and round_completed events
       
       return data;
       
@@ -102,7 +202,7 @@ export const useTournament = (roomCode: string | null) => {
           const retryResponse = await fetch(`/api/rooms/${roomCode}/bracket`, {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(pick),
+            body: JSON.stringify(fullPick),
           });
           
           if (!retryResponse.ok) {
@@ -113,67 +213,56 @@ export const useTournament = (roomCode: string | null) => {
           return retryResponse.json();
         }, classified);
       } else {
-        store.setError(classified.userMessage);
+        setError(classified.userMessage);
         throw error;
       }
     } finally {
+      submittingMatchIdRef.current = null;
       setIsSubmitting(false);
     }
-  }, [roomCode, currentMatch, isSubmitting, currentRound]);
+  }, [roomCode, currentMatch, isSubmitting, clearError, setError]);
 
-  // Check if waiting for partner
-  const isWaitingForPartner = useCallback(() => {
-    if (!tournament || !progress) return false;
-    
-    // If user has completed all picks for current round
-    const userCompletedRound = progress.userProgress.completedPicks >= 
-      Math.ceil(tournament.matches.filter(m => m.roundNumber === currentRound).length / 2);
-    
-    // But partner hasn't
-    const partnerCompletedRound = progress.partnerProgress.completedPicks >= 
-      Math.ceil(tournament.matches.filter(m => m.roundNumber === currentRound).length / 2);
-    
-    return userCompletedRound && !partnerCompletedRound;
-  }, [tournament, progress, currentRound]);
-
-  // Check if tournament is complete
-  const isTournamentComplete = useCallback(() => {
-    return store.room?.status === 'completed';
-  }, [store.room?.status]);
-
-  // Get final picks for face-off
-  const getFinalPicks = useCallback(() => {
-    if (!tournament || currentRound !== tournament.totalRounds) return null;
-    
-    // This would be determined by the final round picks
-    // For now, return placeholder
-    return {
-      userPick: null,
-      partnerPick: null,
-    };
-  }, [tournament, currentRound]);
-
-  return {
+  // Return stable object to prevent unnecessary re-renders
+  return useMemo(() => ({
     // Tournament data
     tournament,
     currentMatch,
     currentRound,
-    totalRounds: tournament?.totalRounds || 0,
+    totalRounds,
+    
+    // Status
+    status: room?.status || 'waiting',
+    isLoading,
+    error,
+    connectionStatus,
     
     // Progress
-    userProgress: progress.userProgress,
-    partnerProgress: progress.partnerProgress,
-    isWaitingForPartner: isWaitingForPartner(),
-    isTournamentComplete: isTournamentComplete(),
+    userProgress,
+    partnerProgress,
+    isWaitingForPartner,
+    isTournamentComplete,
     
     // Actions
     submitPick,
     isSubmitting,
     
     // Final face-off
-    finalPicks: getFinalPicks(),
-    
-    // Error state
-    error: store.error,
-  };
+    finalPicks,
+  }), [
+    tournament,
+    currentMatch,
+    currentRound,
+    totalRounds,
+    room?.status,
+    isLoading,
+    error,
+    connectionStatus,
+    userProgress,
+    partnerProgress,
+    isWaitingForPartner,
+    isTournamentComplete,
+    submitPick,
+    isSubmitting,
+    finalPicks
+  ]);
 }; 

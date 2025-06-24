@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { useTournament } from '@/lib/hooks/useTournament'
-import { useTournamentStore } from '@/lib/stores/tournamentStore'
 import { TournamentMovieCard } from './TournamentMovieCard'
 import { MobileTournamentMovieCard } from './MobileTournamentMovieCard'
 import { ProgressIndicator } from './ProgressIndicator'
@@ -15,11 +14,11 @@ interface BracketScreenProps {
 }
 
 export function BracketScreen({ roomCode }: BracketScreenProps) {
-  const { currentMatch, progress, submitPick } = useTournament(roomCode)
-  const tournament = useTournamentStore(state => state.tournament)
+  const { currentMatch, userProgress, submitPick, currentRound } = useTournament(roomCode)
   const [selectedMovie, setSelectedMovie] = useState<number | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [matchStartTime, setMatchStartTime] = useState<number>(Date.now())
   const { toast } = useToast()
 
   useEffect(() => {
@@ -29,9 +28,17 @@ export function BracketScreen({ roomCode }: BracketScreenProps) {
     return () => window.removeEventListener('resize', checkMobile)
   }, [])
 
+  // Reset match start time when new match loads
+  useEffect(() => {
+    if (currentMatch) {
+      setMatchStartTime(Date.now())
+    }
+  }, [currentMatch?.matchId])
+
   const handleMovieSelect = async (movieId: number) => {
-    if (!currentMatch || isSubmitting) return
+    if (!currentMatch || isSubmitting || selectedMovie !== null) return
     
+    // Immediately set selected state to prevent race conditions
     setSelectedMovie(movieId)
     setIsSubmitting(true)
     
@@ -41,10 +48,11 @@ export function BracketScreen({ roomCode }: BracketScreenProps) {
     }
     
     try {
+      const responseTimeMs = Date.now() - matchStartTime;
       await submitPick({
         matchId: currentMatch.matchId,
         selectedMovieId: movieId,
-        responseTimeMs: Date.now() // This should be tracked from when match started
+        responseTimeMs
       })
       
       // Success feedback
@@ -53,6 +61,7 @@ export function BracketScreen({ roomCode }: BracketScreenProps) {
         description: "Waiting for your partner...",
       })
     } catch (error) {
+      console.error('Error submitting pick:', error);
       toast({
         title: "Failed to submit pick",
         description: "Please try again",
@@ -83,10 +92,10 @@ export function BracketScreen({ roomCode }: BracketScreenProps) {
       <div className="min-h-screen flex flex-col">
         <div className="p-4">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold">Round {tournament?.currentRound}</h2>
+            <h2 className="text-2xl font-bold">Round {currentRound}</h2>
             <ProgressIndicator 
-              current={progress.userProgress.completedPicks} 
-              total={progress.userProgress.totalPicks}
+              current={userProgress?.completedPicks || 0} 
+              total={userProgress?.totalPicks || 0}
               label="picks completed"
             />
           </div>
@@ -129,10 +138,10 @@ export function BracketScreen({ roomCode }: BracketScreenProps) {
   return (
     <div className="max-w-6xl mx-auto p-8">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold mb-4">Round {tournament?.currentRound}</h2>
+        <h2 className="text-3xl font-bold mb-4">Round {currentRound}</h2>
         <ProgressIndicator 
-          current={progress.userProgress.completedPicks} 
-          total={progress.userProgress.totalPicks}
+          current={userProgress?.completedPicks || 0} 
+          total={userProgress?.totalPicks || 0}
           label="picks completed"
         />
       </div>

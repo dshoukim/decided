@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { genres, genreCharacteristics, usersInAuth, users, movieRatings, userGenres, watchParties, partyParticipants, partyQueue, partyVotes, rooms, watchList, bracketPicks, roomHistory, roomParticipants, userMovieElo } from "./schema";
+import { genres, genreCharacteristics, users, movieRatings, userGenres, watchParties, partyParticipants, partyQueue, partyVotes, rooms, watchList, bracketPicks, roomHistory, roomParticipants, userMovieElo } from "./schema";
 
 export const genreCharacteristicsRelations = relations(genreCharacteristics, ({one}) => ({
 	genre: one(genres, {
@@ -13,27 +13,19 @@ export const genresRelations = relations(genres, ({many}) => ({
 	userGenres: many(userGenres),
 }));
 
-export const usersRelations = relations(users, ({one, many}) => ({
-	usersInAuth: one(usersInAuth, {
-		fields: [users.id],
-		references: [usersInAuth.id]
-	}),
+export const usersRelations = relations(users, ({many}) => ({
 	rooms: many(rooms),
 	bracketPicks: many(bracketPicks),
 	roomParticipants: many(roomParticipants),
 	userMovieElos: many(userMovieElo),
-}));
-
-export const usersInAuthRelations = relations(usersInAuth, ({many}) => ({
-	users: many(users),
 	movieRatings: many(movieRatings),
 	watchLists: many(watchList),
 }));
 
 export const movieRatingsRelations = relations(movieRatings, ({one}) => ({
-	usersInAuth: one(usersInAuth, {
+	user: one(users, {
 		fields: [movieRatings.userId],
-		references: [usersInAuth.id]
+		references: [users.id]
 	}),
 }));
 
@@ -76,9 +68,9 @@ export const watchListRelations = relations(watchList, ({one}) => ({
 		fields: [watchList.decidedTogetherRoomId],
 		references: [rooms.id]
 	}),
-	usersInAuth: one(usersInAuth, {
+	user: one(users, {
 		fields: [watchList.userId],
-		references: [usersInAuth.id]
+		references: [users.id]
 	}),
 }));
 

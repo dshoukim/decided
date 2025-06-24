@@ -5,7 +5,7 @@ import { eq, and, desc } from 'drizzle-orm'
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId, tmdbMovieId, movieTitle, ratingType, movieData, userNote } = await request.json()
+    const { userId, tmdbMovieId, movieTitle, ratingType, starRating, movieData, userNote } = await request.json()
 
     if (!userId || !tmdbMovieId || !movieTitle || !ratingType) {
       return NextResponse.json(
@@ -15,12 +15,22 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate rating type
-    const validRatingTypes = ['like', 'dislike', 'love', 'not_seen']
+    const validRatingTypes = ['like', 'dislike', 'love', 'not_seen', 'star']
     if (!validRatingTypes.includes(ratingType)) {
       return NextResponse.json(
-        { error: 'Invalid rating type. Must be one of: like, dislike, love, not_seen' },
+        { error: 'Invalid rating type. Must be one of: like, dislike, love, not_seen, star' },
         { status: 400 }
       )
+    }
+
+    // Validate star rating if provided
+    if (ratingType === 'star') {
+      if (!starRating || starRating < 1 || starRating > 5) {
+        return NextResponse.json(
+          { error: 'Star rating must be between 1 and 5' },
+          { status: 400 }
+        )
+      }
     }
 
     // Check if rating already exists
@@ -44,6 +54,7 @@ export async function POST(request: NextRequest) {
         .set({
           movieTitle,
           ratingType,
+          starRating: ratingType === 'star' ? starRating : null,
           movieData: movieData || null,
           userNote: userNote || null,
           updatedAt: new Date()
@@ -64,6 +75,7 @@ export async function POST(request: NextRequest) {
           tmdbMovieId,
           movieTitle,
           ratingType,
+          starRating: ratingType === 'star' ? starRating : null,
           movieData: movieData || null,
           userNote: userNote || null
         })

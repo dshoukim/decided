@@ -17,24 +17,16 @@ export function FinalFaceoff({ roomCode }: FinalFaceoffProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { toast } = useToast()
   
-  // In a real implementation, these would come from the tournament data
-  // For now, using placeholder data
-  const finalMovieA = tournament?.matches[0]?.movieA || {
-    id: 1,
-    title: "Your Top Pick",
-    poster_path: "",
-    fromUsers: ["user1"],
-    release_date: undefined,
-    vote_average: undefined
-  }
+  // Get the current match from tournament data
+  const currentMatch = tournament?.currentMatch
   
-  const finalMovieB = tournament?.matches[0]?.movieB || {
-    id: 2,
-    title: "Partner's Top Pick",
-    poster_path: "",
-    fromUsers: ["user2"],
-    release_date: undefined,
-    vote_average: undefined
+  if (!currentMatch || !currentMatch.movieA || !currentMatch.movieB) {
+    console.error('FinalFaceoff: No current match found');
+    return (
+      <div className="max-w-4xl mx-auto p-8 text-center">
+        <p className="text-red-600">Error: Invalid final round data</p>
+      </div>
+    );
   }
   
   const handleSelectWinner = async (movieId: number) => {
@@ -42,28 +34,34 @@ export function FinalFaceoff({ roomCode }: FinalFaceoffProps) {
     setIsSubmitting(true)
     
     try {
-      const response = await fetch(`/api/rooms/${roomCode}/winner`, {
+      // Submit pick through action API
+      const response = await fetch(`/api/decided/rooms/${roomCode}/action`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          finalPickUserA: finalMovieA.id,
-          finalPickUserB: finalMovieB.id,
-          selectedWinner: movieId,
+          action: 'pick',
+          payload: {
+            matchId: currentMatch.matchId,
+            selectedMovieId: movieId,
+            responseTimeMs: Date.now() - performance.now(), // More accurate response time
+          },
+          idempotencyKey: `pick-${currentMatch.matchId}-${Date.now()}`
         }),
       })
       
       if (!response.ok) {
-        throw new Error('Failed to submit winner')
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to submit final pick')
       }
       
       toast({
-        title: "Winner selected!",
-        description: "The movie has been added to both watch lists.",
+        title: "Final pick submitted!",
+        description: "Waiting for your partner to make their final choice...",
       })
-    } catch (error) {
+    } catch (error: any) {
       toast({
-        title: "Failed to select winner",
-        description: "Please try again",
+        title: "Failed to submit final pick",
+        description: error.message || "Please try again",
         variant: "destructive"
       })
       setSelectedWinner(null)
@@ -89,11 +87,11 @@ export function FinalFaceoff({ roomCode }: FinalFaceoffProps) {
       
       <div className="grid md:grid-cols-[1fr,auto,1fr] gap-4 md:gap-8 items-center">
         <div className="text-center space-y-4">
-          <h3 className="text-xl font-semibold">Your Top Pick</h3>
+          <h3 className="text-xl font-semibold">Finalist #1</h3>
           <TournamentMovieCard
-            movie={finalMovieA}
-            onSelect={() => handleSelectWinner(finalMovieA.id)}
-            isSelected={selectedWinner === finalMovieA.id}
+            movie={currentMatch.movieA}
+            onSelect={() => handleSelectWinner(currentMatch.movieA.id)}
+            isSelected={selectedWinner === currentMatch.movieA.id}
             disabled={isSubmitting}
           />
         </div>
@@ -103,11 +101,11 @@ export function FinalFaceoff({ roomCode }: FinalFaceoffProps) {
         </div>
         
         <div className="text-center space-y-4">
-          <h3 className="text-xl font-semibold">Partner's Top Pick</h3>
+          <h3 className="text-xl font-semibold">Finalist #2</h3>
           <TournamentMovieCard
-            movie={finalMovieB}
-            onSelect={() => handleSelectWinner(finalMovieB.id)}
-            isSelected={selectedWinner === finalMovieB.id}
+            movie={currentMatch.movieB}
+            onSelect={() => handleSelectWinner(currentMatch.movieB.id)}
+            isSelected={selectedWinner === currentMatch.movieB.id}
             disabled={isSubmitting}
           />
         </div>

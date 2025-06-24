@@ -24,17 +24,20 @@ export const movieRatings = pgTable('movie_ratings', {
   tmdbMovieId: integer('tmdb_movie_id').notNull(),
   movieTitle: text('movie_title').notNull(),
   ratingType: text('rating_type').notNull(),
+  starRating: integer('star_rating'), // 1-5 star rating
   movieData: jsonb('movie_data'),
   userNote: text('user_note'),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 }, (table) => {
   return {
-    ratingTypeCheck: check('rating_type_check', sql`${table.ratingType} IN ('like', 'dislike', 'love', 'not_seen')`),
+    ratingTypeCheck: check('rating_type_check', sql`${table.ratingType} IN ('like', 'dislike', 'love', 'not_seen', 'star')`),
+    starRatingCheck: check('star_rating_check', sql`${table.starRating} IS NULL OR (${table.starRating} >= 1 AND ${table.starRating} <= 5)`),
     userMovieUnique: uniqueIndex('idx_movie_ratings_user_movie').on(table.userId, table.tmdbMovieId),
     userIdIdx: index('idx_movie_ratings_user_id').on(table.userId),
     tmdbIdIdx: index('idx_movie_ratings_tmdb_id').on(table.tmdbMovieId),
-    ratingTypeIdx: index('idx_movie_ratings_rating_type').on(table.ratingType)
+    ratingTypeIdx: index('idx_movie_ratings_rating_type').on(table.ratingType),
+    starRatingIdx: index('idx_movie_ratings_star_rating').on(table.starRating)
   }
 })
 
@@ -63,7 +66,7 @@ export const watchList = pgTable('watch_list', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 }, (table) => {
   return {
-    addedFromCheck: check('added_from_check', sql`${table.addedFrom} IN ('survey', 'search', 'manual')`),
+    addedFromCheck: check('added_from_check', sql`${table.addedFrom} IN ('survey', 'search', 'manual', 'decided_together')`),
     userMovieUnique: uniqueIndex('idx_watch_list_user_movie').on(table.userId, table.tmdbMovieId),
     userIdIdx: index('idx_watch_list_user_id').on(table.userId),
     tmdbIdIdx: index('idx_watch_list_tmdb_id').on(table.tmdbMovieId),
@@ -109,6 +112,66 @@ export const genreCharacteristics = pgTable('genre_characteristics', {
   }
 })
 
+// Films table - comprehensive movie database
+export const films = pgTable('films', {
+  // Primary identifiers
+  id: serial('id').primaryKey(),
+  tmdbId: integer('tmdb_id').unique().notNull(),
+  imdbId: varchar('imdb_id', { length: 15 }), // e.g., "tt0111161"
+  
+  // Core movie information
+  title: varchar('title', { length: 500 }).notNull(),
+  originalTitle: varchar('original_title', { length: 500 }),
+  overview: text('overview'),
+  tagline: text('tagline'),
+  
+  // Release and status
+  releaseDate: text('release_date'), // Using text for date as it matches existing pattern
+  status: varchar('status', { length: 50 }), // 'Released', 'In Production', 'Post Production', etc.
+  runtime: integer('runtime'), // minutes
+  
+  // Ratings and popularity
+  voteAverage: integer('vote_average'), // Store as integer * 10 (e.g., 7.5 = 75)
+  voteCount: integer('vote_count'),
+  popularity: integer('popularity'), // Store as integer * 1000 for precision
+  
+  // Content classification
+  adult: boolean('adult').default(false),
+  originalLanguage: varchar('original_language', { length: 5 }), // ISO 639-1 codes
+  spokenLanguages: text('spoken_languages').array(), // Array of language codes
+  
+  // Media assets
+  posterPath: varchar('poster_path', { length: 255 }),
+  backdropPath: varchar('backdrop_path', { length: 255 }),
+  trailerLink: varchar('trailer_link', { length: 500 }),
+  
+  // Financial data
+  budget: integer('budget'), // In USD
+  revenue: integer('revenue'), // In USD
+  
+  // Classification and metadata
+  genres: text('genres').array(), // Array of genre names
+  productionCompanies: text('production_companies').array(),
+  productionCountries: text('production_countries').array(),
+  keywords: text('keywords').array(),
+  
+  // Timestamps
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+  lastSyncedAt: timestamp('last_synced_at', { withTimezone: true }), // When last synced from TMDB
+}, (table) => ({
+  tmdbIdIdx: index('idx_films_tmdb_id').on(table.tmdbId),
+  imdbIdIdx: index('idx_films_imdb_id').on(table.imdbId),
+  titleIdx: index('idx_films_title').on(table.title),
+  releaseDateIdx: index('idx_films_release_date').on(table.releaseDate),
+  statusIdx: index('idx_films_status').on(table.status),
+  voteAverageIdx: index('idx_films_vote_average').on(table.voteAverage),
+  popularityIdx: index('idx_films_popularity').on(table.popularity),
+  genresIdx: index('idx_films_genres').on(table.genres),
+  languageIdx: index('idx_films_language').on(table.originalLanguage),
+  adultIdx: index('idx_films_adult').on(table.adult),
+}));
+
 // Type exports for easier use
 export type User = typeof users.$inferSelect
 export type NewUser = typeof users.$inferInsert
@@ -119,6 +182,8 @@ export type NewWatchListItem = typeof watchList.$inferInsert
 export type StreamingService = typeof streamingServices.$inferSelect
 export type Genre = typeof genres.$inferSelect
 export type GenreCharacteristic = typeof genreCharacteristics.$inferSelect
+export type Film = typeof films.$inferSelect
+export type NewFilm = typeof films.$inferInsert
 
 // Decided Schemas
 export const rooms = pgTable('rooms', {
@@ -149,6 +214,8 @@ export const roomParticipants = pgTable('room_participants', {
   leftAt: timestamp('left_at', { withTimezone: true }),
   isActive: boolean('is_active').default(true),
   finalPickMovieId: integer('final_pick_movie_id'),
+  completedMatches: text('completed_matches').array().default(sql`'{}'::text[]`),
+  currentMatchIndex: integer('current_match_index').default(0),
 }, (table) => ({
   roomUserUnique: unique().on(table.roomId, table.userId),
   roomIdx: index('idx_room_participants_room').on(table.roomId),
@@ -209,4 +276,52 @@ export type NewBracketPick = typeof bracketPicks.$inferInsert;
 export type UserMovieElo = typeof userMovieElo.$inferSelect;
 export type NewUserMovieElo = typeof userMovieElo.$inferInsert;
 export type RoomHistory = typeof roomHistory.$inferSelect;
-export type NewRoomHistory = typeof roomHistory.$inferInsert; 
+export type NewRoomHistory = typeof roomHistory.$inferInsert;
+
+// Decided V2 Tables
+export const roomStates = pgTable('room_states', {
+  roomId: uuid('room_id').primaryKey().references(() => rooms.id, { onDelete: 'cascade' }),
+  stateVersion: integer('state_version').notNull().default(1),
+  currentState: jsonb('current_state').notNull(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow(),
+  updatedBy: uuid('updated_by').references(() => users.id),
+}, (table) => ({
+  versionIdx: index('idx_room_states_version').on(table.roomId, table.stateVersion),
+}));
+
+export const matchCompletions = pgTable('match_completions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  roomId: uuid('room_id').notNull().references(() => rooms.id, { onDelete: 'cascade' }),
+  matchId: varchar('match_id', { length: 50 }).notNull(),
+  roundNumber: integer('round_number').notNull(),
+  completedAt: timestamp('completed_at', { withTimezone: true }).defaultNow(),
+  nextMatchId: varchar('next_match_id', { length: 50 }),
+}, (table) => ({
+  roomMatchUnique: unique().on(table.roomId, table.matchId),
+  roomIdx: index('idx_match_completions_room').on(table.roomId),
+  matchIdx: index('idx_match_completions_match').on(table.matchId),
+}));
+
+export const userActions = pgTable('user_actions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  roomId: uuid('room_id').notNull().references(() => rooms.id, { onDelete: 'cascade' }),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  actionType: varchar('action_type', { length: 50 }).notNull(),
+  actionPayload: jsonb('action_payload'),
+  idempotencyKey: varchar('idempotency_key', { length: 100 }),
+  processedAt: timestamp('processed_at', { withTimezone: true }).defaultNow(),
+  result: varchar('result', { length: 20 }).notNull(),
+  errorMessage: text('error_message'),
+}, (table) => ({
+  resultCheck: check('result_check', sql`${table.result} IN ('success', 'error', 'ignored')`),
+  roomUserIdx: index('idx_user_actions_room_user').on(table.roomId, table.userId),
+  idempotencyIdx: index('idx_user_actions_idempotency').on(table.idempotencyKey),
+  processedAtIdx: index('idx_user_actions_processed_at').on(table.processedAt),
+}));
+
+export type RoomState = typeof roomStates.$inferSelect;
+export type NewRoomState = typeof roomStates.$inferInsert;
+export type MatchCompletion = typeof matchCompletions.$inferSelect;
+export type NewMatchCompletion = typeof matchCompletions.$inferInsert;
+export type UserAction = typeof userActions.$inferSelect;
+export type NewUserAction = typeof userActions.$inferInsert; 

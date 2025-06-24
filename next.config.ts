@@ -3,6 +3,9 @@ import path from 'path';
 
 const nextConfig: NextConfig = {
   images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
     domains: [
       'assets.nflxext.com',
       'upload.wikimedia.org',
@@ -27,7 +30,16 @@ const nextConfig: NextConfig = {
       'www.playstation.com',
       'tubitv.com',
       'pluto.tv',
-      'www.crackle.com'
+      'www.crackle.com',
+      // Google user content domains for profile images
+      'lh3.googleusercontent.com',
+      'lh4.googleusercontent.com',
+      'lh5.googleusercontent.com',
+      'lh6.googleusercontent.com',
+      // TMDB image domains for movie posters
+      'image.tmdb.org',
+      // UI Avatars service for generated profile images
+      'ui-avatars.com'
     ],
   },
   webpack: (config) => {
@@ -43,6 +55,13 @@ const nextConfig: NextConfig = {
   },
   typescript: {
     ignoreBuildErrors: true,
+  },
+  // Temporarily disable type checking during development
+  onDemandEntries: {
+    // period (in ms) where the server will keep pages in the buffer
+    maxInactiveAge: 25 * 1000,
+    // number of pages that should be kept simultaneously without being disposed
+    pagesBufferLength: 2,
   },
 };
 

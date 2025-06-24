@@ -44,6 +44,33 @@ npm run dev
 
 2. Open [http://localhost:3000](http://localhost:3000) in your browser
 
+---
+
+## Local Real-time Testing with ngrok (WebSocket Tunneling)
+
+To test real-time tournament flows with two users (on different devices or networks), you need your local Supabase Realtime server to be publicly accessible. You can do this using [ngrok](https://ngrok.com/):
+
+1. **Start your local Supabase backend** (if not already running).
+2. **Start ngrok** to tunnel your Supabase backend port (default is 54321):
+   ```bash
+   ngrok http 54321
+   ```
+3. **Copy the public ngrok URL** (e.g., `https://abcd1234.ngrok.io`).
+4. **Update your `.env.local`**:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=https://abcd1234.ngrok.io
+   ```
+   (Keep your existing `NEXT_PUBLIC_SUPABASE_ANON_KEY` value.)
+5. **Restart your Next.js app** if it was running.
+6. **Open the app on two devices/browsers** using the ngrok URL to test real-time features.
+
+**Note:**
+- Never use ngrok for production.
+- For security, restrict access to your tunnel if possible.
+- If you use a custom port or a different tunnel provider, adjust the instructions accordingly.
+
+---
+
 ## How It Works
 
 ### Core Feature: Decided

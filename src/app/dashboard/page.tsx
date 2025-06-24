@@ -132,7 +132,7 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
+      <div className="grid md:grid-cols-3 gap-6 mb-8">
         <Card className="hover:shadow-lg transition-shadow">
           <CardHeader>
             <CardTitle>Browse Movies</CardTitle>
@@ -142,6 +142,21 @@ export default function Dashboard() {
             <Button className="w-full">
               <Search className="mr-2 h-4 w-4" />
               Search Movies
+            </Button>
+          </CardContent>
+        </Card>
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader>
+            <CardTitle>Explore Films</CardTitle>
+            <CardDescription>Browse our comprehensive film database</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              className="w-full" 
+              variant="outline"
+              onClick={() => router.push('/explore')}
+            >
+              🎬 Explore Films
             </Button>
           </CardContent>
         </Card>

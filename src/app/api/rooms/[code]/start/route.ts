@@ -84,11 +84,15 @@ export async function POST(
     const participantIds = activeParticipants.map((p: any) => p.userId);
     const [userAId, userBId] = participantIds;
 
+    // Determine if we should use test mode (for development/testing)
+    const testMode = process.env.NODE_ENV === 'development' || 
+                     request.headers.get('x-test-mode') === 'true';
+
     // Generate tournament using the tournament engine
     const tournament = await TournamentMetrics.measureAsync(
       'tournament_generation',
       { roomId: room.id, participantCount: 2, movieCount: 0 },
-      async () => TournamentEngine.generateTournament(userAId, userBId)
+      async () => TournamentEngine.generateTournament(userAId, userBId, { testMode })
     );
 
     // Use atomic transaction to update room state and save tournament data
@@ -100,7 +104,6 @@ export async function POST(
           status: 'active',
           startedAt: new Date(),
           tournamentData: tournament,
-          updatedAt: new Date().toISOString(),
         })
         .where(eq(rooms.id, room.id));
 

@@ -1,0 +1,370 @@
+{
+  "title": "When Harry Met Sally",
+  "url": "https://www.rottentomatoes.com/m/when_harry_met_sally",
+  "tomato_meter_score": 89,
+  "audience_score": 89,
+  "critic_reviews": [
+    {
+      "reviewer": "Cameron Ritter",
+      "publication": "InSession Film",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 25, 2024",
+      "review_text": "It’s a perfect movie, the pinnacle of Meg Ryan’s career, and the only thing I think about when thinking about Billy Crystal.",
+      "full_review_link": "https://insessionfilm.com/classic-film-review-when-harry-met-sally-is-an-unimpeachable-classic/"
+    },
+    {
+      "reviewer": "Dan DiNicola",
+      "publication": "The Daily Gazette (Schenectady, NY)",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 12, 2024",
+      "review_text": "Enhanced by a dreamy mood and a quintessentially American score, When Harry Met Sally has some deft, witty observations about the nature of male-female relationships in our time.",
+      "full_review_link": "https://books.google.com/books?id=1XEhAAAAIBAJ&pg=PA10&dq=%22DiNicola%22++when+harry+met+sally&article_id=1286,4952627&hl=en&sa=X&ved=2ahUKEwir6YnRx6KHAxVaBDQIHcFyDK4Q6AF6BAgIEAI#v=onepage&q=%22DiNicola%22%20%20when%20harry%20met%20sally&f=false"
+    },
+    {
+      "reviewer": "David Robinson",
+      "publication": "The Times (UK)",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 12, 2024",
+      "review_text": "Rob Reiner's direction is feather-light, precisely paced and with fine appreciation of the sharp New Yorkisms of the dialogue.",
+      "full_review_link": "https://archive.org/details/NewsUK1989UKEnglish/Nov%2030%201989%2C%20The%20Times%2C%20%2363565%2C%20UK%20%28en%29/page/n19/mode/2up?view=theater"
+    },
+    {
+      "reviewer": "Peter Keough",
+      "publication": "Boston Phoenix",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 12, 2024",
+      "review_text": "Reiner seems to share his characters’ narcissism. Or at least, like Harry, he tends to shy from troublesome emotions.",
+      "full_review_link": "https://archive.org/details/sim_boston-phoenix_july-14-20-1989_18_28/page/n73/mode/2up?view=theater"
+    },
+    {
+      "reviewer": "Joanna Connors",
+      "publication": "Cleveland Plain Dealer",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 12, 2024",
+      "review_text": "Reiner and Ephron deftly thread Casablanca through Harry and Sally's on-again, off-again relationship.",
+      "full_review_link": "https://www.newspapers.com/article/the-plain-dealer-when-harry-met-sally/151157495/"
+    },
+    {
+      "reviewer": "Jeff Simon",
+      "publication": "Buffalo News",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 12, 2024",
+      "review_text": "Anyone with even the vaguest knowledge of everything Reiner and Ephron have done thus far knows that When Harry Met Sally is their baby all the way -- wall-eyed sentimental ending and all.",
+      "full_review_link": "https://www.newspapers.com/article/the-buffalo-news-when-harry-met-sally/151156445/"
+    },
+    {
+      "reviewer": "Dennis King",
+      "publication": "Tulsa World",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 12, 2024",
+      "review_text": "Despite a troubling superficiality, When Harry met Sally... delivers something rare for a summer movie -- a bright, intelligent, timely and funny comedy of adult manners.",
+      "full_review_link": "https://www.newspapers.com/article/tulsa-world-when-harry-met-sally/151156284/"
+    },
+    {
+      "reviewer": "Henry Mietkiewicz",
+      "publication": "Toronto Star",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 12, 2024",
+      "review_text": "When Harry Met Sally... excels in its dead-on representation of gentle, intimate, everyday truths.",
+      "full_review_link": "https://www.newspapers.com/article/the-toronto-star-when-harry-met-sally/151155929/"
+    },
+    {
+      "reviewer": "Bob Ross",
+      "publication": "Tampa Tribune",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 12, 2024",
+      "review_text": "Such culturally deft variations on familiar themes help make Harry Met Sally more substantial -- and enjoyable -- than the basic witty romance that it might have become.",
+      "full_review_link": "https://www.newspapers.com/article/the-tampa-tribune-when-harry-met-sally/151155499/"
+    },
+    {
+      "reviewer": "Hal Lipper",
+      "publication": "Tampa Bay Times",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 12, 2024",
+      "review_text": "When Harry Met Sally... is pure movie magic.",
+      "full_review_link": "https://www.newspapers.com/article/tampa-bay-times-when-harry-met-sally/151155248/"
+    },
+    {
+      "reviewer": "Charles Golding",
+      "publication": "Sunday Mirror (UK)",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 12, 2024",
+      "review_text": "A well-written and well-directed movie with excellent performances from both Crystal and Ryan.",
+      "full_review_link": "https://www.newspapers.com/article/sunday-mirror-when-harry-met-sally/151155002/"
+    },
+    {
+      "reviewer": "Lynden Barber",
+      "publication": "Sydney Morning Herald",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 12, 2024",
+      "review_text": "A witty adult comedy whose dissection of sexual mores and relationships between the sexes manages to be delightfully old-fashioned and utterly contemporary in one stroke.",
+      "full_review_link": "https://www.newspapers.com/article/the-sydney-morning-herald-when-harry-met/151154441/"
+    },
+    {
+      "reviewer": "Neil Jillett",
+      "publication": "The Age (Australia)",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 11, 2024",
+      "review_text": "Meg Ryan and Billy Crystal and a script laced with wit and occasional wisdom are not enough to make When Harry Met Sally more than a romantic comedy with a passable ability to raise a few chuckles.",
+      "full_review_link": "https://www.newspapers.com/article/the-age-when-harry-met-sally/151149905/"
+    },
+    {
+      "reviewer": "Joe Pollack",
+      "publication": "St. Louis Post-Dispatch",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 11, 2024",
+      "review_text": "Despite its flaws, I like When Harry Met Sally... a great deal. It has charm and wit and style, three ingredients too often missing from movies and more important, it's mostly very funny.",
+      "full_review_link": "https://www.newspapers.com/article/st-louis-post-dispatch-when-harry-met-s/151149562/"
+    },
+    {
+      "reviewer": "Bruce R. Miller",
+      "publication": "Sioux City Journal",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 11, 2024",
+      "review_text": "The things Nora Ephron's script has to say about '80s relationships are so insightful, so direct, they demand attention.",
+      "full_review_link": "https://www.newspapers.com/article/the-sioux-city-journal-when-harry-met-sa/151149140/"
+    },
+    {
+      "reviewer": "Rick Chatenever",
+      "publication": "Santa Cruz Sentinel",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 11, 2024",
+      "review_text": "It succeeds admirably -- not only making you laugh but also providing a sweet romantic refuge. It makes you want to believe in romance again, in spite of all the evidence to the contrary.",
+      "full_review_link": "https://www.newspapers.com/article/santa-cruz-sentinel-when-harry-met-sally/151148658/"
+    },
+    {
+      "reviewer": "Craig Seligman",
+      "publication": "San Francisco Examiner",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 11, 2024",
+      "review_text": "The movie is a lengthy series of gags, most of which revolve around public embarrassment.",
+      "full_review_link": "https://www.newspapers.com/article/the-san-francisco-examiner-when-harry-me/151147875/"
+    },
+    {
+      "reviewer": "Terry Orme",
+      "publication": "Salt Lake Tribune",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 11, 2024",
+      "review_text": "Reiner and company have come up with a wonderful concoction, a humorous, perceptive and completely engaging movie about the possibilities of love and commitment in the '80s.",
+      "full_review_link": "https://www.newspapers.com/article/the-salt-lake-tribune-when-harry-met-sal/151147600/"
+    },
+    {
+      "reviewer": "Joe Baltake",
+      "publication": "Sacramento Bee",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 11, 2024",
+      "review_text": "Ephron's dialogue is nothing but platitudes, aphorisms and epigrams.",
+      "full_review_link": "https://www.newspapers.com/article/the-sacramento-bee-when-harry-met-sally/151146815/"
+    },
+    {
+      "reviewer": "Marylynn Uricchio",
+      "publication": "Pittsburgh Post-Gazette",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jul 11, 2024",
+      "review_text": "it's a good movie, and literate in a way that's always welcome, but you come away simply entertained and not enlightened by any new perspective.",
+      "full_review_link": "https://www.newspapers.com/article/pittsburgh-post-gazette-when-harry-met-s/151091408/"
+    },
+    {
+      "reviewer": "David Robinson",
+      "publication": "The Times (UK)",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 12, 2024",
+      "review_text": "Rob Reiner's direction is feather-light, precisely paced and with fine appreciation of the sharp New Yorkisms of the dialogue.",
+      "full_review_link": "https://archive.org/details/NewsUK1989UKEnglish/Nov%2030%201989%2C%20The%20Times%2C%20%2363565%2C%20UK%20%28en%29/page/n19/mode/2up?view=theater"
+    },
+    {
+      "reviewer": "Henry Mietkiewicz",
+      "publication": "Toronto Star",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 12, 2024",
+      "review_text": "When Harry Met Sally... excels in its dead-on representation of gentle, intimate, everyday truths.",
+      "full_review_link": "https://www.newspapers.com/article/the-toronto-star-when-harry-met-sally/151155929/"
+    },
+    {
+      "reviewer": "Lynden Barber",
+      "publication": "Sydney Morning Herald",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 12, 2024",
+      "review_text": "A witty adult comedy whose dissection of sexual mores and relationships between the sexes manages to be delightfully old-fashioned and utterly contemporary in one stroke.",
+      "full_review_link": "https://www.newspapers.com/article/the-sydney-morning-herald-when-harry-met/151154441/"
+    },
+    {
+      "reviewer": "Neil Jillett",
+      "publication": "The Age (Australia)",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 11, 2024",
+      "review_text": "Meg Ryan and Billy Crystal and a script laced with wit and occasional wisdom are not enough to make When Harry Met Sally more than a romantic comedy with a passable ability to raise a few chuckles.",
+      "full_review_link": "https://www.newspapers.com/article/the-age-when-harry-met-sally/151149905/"
+    },
+    {
+      "reviewer": "Joe Pollack",
+      "publication": "St. Louis Post-Dispatch",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 11, 2024",
+      "review_text": "Despite its flaws, I like When Harry Met Sally... a great deal. It has charm and wit and style, three ingredients too often missing from movies and more important, it's mostly very funny.",
+      "full_review_link": "https://www.newspapers.com/article/st-louis-post-dispatch-when-harry-met-s/151149562/"
+    },
+    {
+      "reviewer": "Bob Thomas",
+      "publication": "Associated Press",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 10, 2024",
+      "review_text": "Cary Fisher and Bruno Kirby play the best friends of Sally and Harry, and they match the excellence of the two stars.",
+      "full_review_link": "https://www.newspapers.com/article/northwest-herald-when-harry-met-sally/151020253/"
+    },
+    {
+      "reviewer": "Kathleen Carroll",
+      "publication": "New York Daily News",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 10, 2024",
+      "review_text": "What a pleasure it is to see a warm-hearted, intelligently written comedy in this silly season of pre-fabricated sequels.",
+      "full_review_link": "https://www.newspapers.com/article/daily-news-when-harry-met-sally-12/151019537/"
+    },
+    {
+      "reviewer": "Mike McGrady",
+      "publication": "Newsday",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 9, 2024",
+      "review_text": "Rob Reiner gives When Harry Met Sally its own comic life, its own solid identity.",
+      "full_review_link": "https://www.newspapers.com/article/newsday-when-harry-met-sally/151014982/"
+    },
+    {
+      "reviewer": "Jeff Strickler",
+      "publication": "Minneapolis Star Tribune",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 9, 2024",
+      "review_text": "This is a sophisticated romantic comedy about a pair of longtime friends who have trouble realizing they are in love.",
+      "full_review_link": "https://www.newspapers.com/article/star-tribune-when-harry-met-sally-12/151012877/"
+    },
+    {
+      "reviewer": "Alexander Walker",
+      "publication": "London Evening Standard",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 9, 2024",
+      "review_text": "A comedy about a relationship in which the people express feelings about themselves every minute they're together -- yet do nothing about it.",
+      "full_review_link": "https://www.newspapers.com/article/evening-standard-when-harry-met-sally/151011441/"
+    },
+    {
+      "reviewer": "Adam Mars-Jones",
+      "publication": "Independent (UK)",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 9, 2024",
+      "review_text": "Nora Ephron's screenplay, consistently funny and charming, is her best work by far.",
+      "full_review_link": "https://www.newspapers.com/article/the-independent-when-harry-met-sally/151005848/"
+    },
+    {
+      "reviewer": "Derek Malcolm",
+      "publication": "Guardian",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 9, 2024",
+      "review_text": "Nora Ephron has written one of the best and most influentially mock-cynical screenplays of the Hollywood year.",
+      "full_review_link": "https://www.newspapers.com/article/the-guardian-when-harry-met-sally/151003187/"
+    },
+    {
+      "reviewer": "Michael H. Price",
+      "publication": "Fort Worth Star-Telegram/DFW.com",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 9, 2024",
+      "review_text": "One heck of an entertaining movie, a heartbreaker/heartwarmer...",
+      "full_review_link": "https://www.newspapers.com/article/fort-worth-star-telegram-when-harry-met/150995718/"
+    },
+    {
+      "reviewer": "Hugo Davenport",
+      "publication": "Daily Telegraph (UK)",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 4, 2024",
+      "review_text": "A richly satisfying and thoroughly delightful film.",
+      "full_review_link": "https://www.newspapers.com/article/the-daily-telegraph-when-harry-met-sally/150598878/"
+    },
+    {
+      "reviewer": "Jay Carr",
+      "publication": "Boston Globe",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 4, 2024",
+      "review_text": "Reiner's passions, although given imperfect shape, are the real thing, and are refreshing to encounter, as well as sympathetic.",
+      "full_review_link": "https://www.newspapers.com/article/the-boston-globe-when-harry-met-sally/150596947/"
+    },
+    {
+      "reviewer": "Eleanor Ringel Cater",
+      "publication": "Atlanta Journal-Constitution",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 3, 2024",
+      "review_text": "An immensely winning film with some knowing things to say about friends and lovers and how the twain do meet... sometimes.",
+      "full_review_link": "https://www.newspapers.com/article/the-atlanta-constitution-when-harry-met/150588064/"
+    },
+    {
+      "reviewer": "Philip Wuntch",
+      "publication": "Dallas Morning News",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 3, 2024",
+      "review_text": "The movie is a signal triumph for virtually all its participants.",
+      "full_review_link": "https://www.newspapers.com/article/arizona-republic-when-harry-met-sally-1/150584979/"
+    },
+    {
+      "reviewer": "Wendy Ide",
+      "publication": "The Times (UK)",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Mar 25, 2024",
+      "review_text": "Possibly the greatest romantic comedy since Some Like It Hot...",
+      "full_review_link": "https://www.thetimes.co.uk/article/whats-on-tv-and-radio-this-weekend-saturday-march-23-and-sunday-march-24-6bdnt965h"
+    },
+    {
+      "reviewer": "THR Staff",
+      "publication": "The Hollywood Reporter",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 18, 2018",
+      "review_text": "When Harry Met Sally is a beautiful, brainy, touching and lilting romantic comedy that should touch the heartstrings of lovers and those yearning to be in love everywhere.",
+      "full_review_link": "https://www.hollywoodreporter.com/review/harry-met-sally-1989-review-959579"
+    },
+    {
+      "reviewer": "Glenn Heath Jr.",
+      "publication": "Little White Lies",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Dec 11, 2015",
+      "review_text": "Cynically lovely and a whip smart archetype for the modern rom-com.",
+      "full_review_link": "http://lwlies.com/reviews/when-harry-met-sally-1989/"
+    }
+  ],
+  "audience_reviews": [],
+  "scraped_at": "2025-06-24T03:23:20.484Z"
+}

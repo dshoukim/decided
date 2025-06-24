@@ -139,7 +139,20 @@ export default function MovieDetailModal({
     }
   }
 
+  // Helper function to extract YouTube video ID from various YouTube URL formats
+  const getYouTubeVideoId = (url: string): string | null => {
+    if (!url) return null
+    
+    const regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/
+    const match = url.match(regExp)
+    return (match && match[7].length === 11) ? match[7] : null
+  }
+
   if (!isOpen || !movie) return null
+
+  // Get trailer info from the extended movie object (only after null check)
+  const movieWithTrailer = movie as TMDBMovie & { trailerLink?: string | null }
+  const trailerVideoId = movieWithTrailer.trailerLink ? getYouTubeVideoId(movieWithTrailer.trailerLink) : null
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -199,6 +212,23 @@ export default function MovieDetailModal({
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">Overview</h3>
                     <p className="text-gray-700 leading-relaxed">{movie.overview}</p>
+                  </div>
+                )}
+
+                {/* Trailer */}
+                {trailerVideoId && (
+                  <div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">🎬 Watch Trailer</h3>
+                    <div className="relative w-full" style={{ paddingBottom: '56.25%' /* 16:9 aspect ratio */ }}>
+                      <iframe
+                        className="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg"
+                        src={`https://www.youtube.com/embed/${trailerVideoId}?rel=0&modestbranding=1&fs=1&cc_load_policy=0&iv_load_policy=3&theme=dark&color=white&autohide=0&controls=1&enablejsapi=1`}
+                        title={`${movie.title} - Trailer`}
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      ></iframe>
+                    </div>
                   </div>
                 )}
 

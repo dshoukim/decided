@@ -1,112 +1,128 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState, useMemo } from 'react';
 import useSWR from 'swr';
-import { useTournamentStore } from '@/lib/stores/tournamentStore';
-import { RoomRealtimeManager } from '@/lib/realtime/roomRealtime';
-import { classifyError, retryWithBackoff } from '@/lib/errors/errorClassification';
 import { useUser } from '@/lib/hooks/useUser';
+import { RoomRealtimeManager } from '@/lib/realtime/roomRealtime';
+import { useTournamentStore } from '@/lib/stores/tournamentStore';
+import { classifyError, retryWithBackoff } from '@/lib/errors/errorClassification';
 import { useToast } from '@/components/ui/use-toast';
-import { mapApiParticipantsToStore } from '@/lib/utils/participants'
-
-// Global map to track active connections per room
-const activeConnections = new Map<string, RoomRealtimeManager>();
 
 const fetcher = async (url: string) => {
   const response = await fetch(url);
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.message || `HTTP ${response.status}`);
+    throw new Error(`HTTP ${response.status}`);
   }
   return response.json();
 };
 
 export const useRoom = (roomCode: string | null) => {
   const { user } = useUser();
+  const userId = user?.id;
   const { toast } = useToast();
   const store = useTournamentStore();
-  const [retryCount, setRetryCount] = useState(0);
-  const [realtimeManager, setRealtimeManager] = useState<RoomRealtimeManager | null>(null);
-  const realtimeRef = useRef<RoomRealtimeManager | null>(null);
+  
+  // Use refs to prevent useEffect from re-running unnecessarily
   const mountedRef = useRef(true);
+  const initializingRef = useRef(false);
+  const cleanupRef = useRef<(() => Promise<void>) | null>(null);
+  
+  // Stable user info - only update when actually changed
+  const [stableUserInfo, setStableUserInfo] = useState({
+    id: userId,
+    displayName: user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anonymous'
+  });
+  
+  // Update stable user info only when values actually change
+  useEffect(() => {
+    const newDisplayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anonymous';
+    
+    if (userId !== stableUserInfo.id || newDisplayName !== stableUserInfo.displayName) {
+      setStableUserInfo({
+        id: userId,
+        displayName: newDisplayName
+      });
+    }
+  }, [userId, user?.user_metadata?.full_name, user?.email, stableUserInfo.id, stableUserInfo.displayName]);
 
-  // Get userId from user or localStorage
-  const userId = user?.id || (typeof window !== 'undefined' ? localStorage.getItem('userId') : null);
+  const [realtimeManager, setRealtimeManager] = useState<RoomRealtimeManager | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
 
-  // Fetch room data with SWR
-  const { data, error, mutate, isLoading } = useSWR(
-    roomCode && userId ? `/api/rooms/${roomCode}?userId=${userId}` : null,
+  // SWR for room data - no polling since we use real-time updates
+  const { data: roomData, error: roomError, isLoading, mutate } = useSWR(
+    roomCode ? `/api/rooms/${roomCode}` : null,
     fetcher,
-    { 
-      refreshInterval: store.connectionStatus === 'error' ? 5000 : 0, // Fallback polling on error
+    {
+      refreshInterval: 0, // Disable polling - use real-time updates instead
       revalidateOnFocus: false,
-      onSuccess: (data) => {
-        if (data.room) {
+      revalidateOnReconnect: false,
+      onSuccess: (data: any) => {
+        if (data?.room) {
           store.setRoom(data.room);
-
-          // Map API participants to store participant structure
-          const mappedParticipants = mapApiParticipantsToStore(data.room.participants || []);
-          store.setParticipants(mappedParticipants);
-          setRetryCount(0); // Reset retry count on success
         }
+        if (data?.participants) {
+          store.setParticipants(data.participants);
+        }
+        if (data?.tournament) {
+          store.setTournament(data.tournament);
+        }
+        store.setError(null);
       },
-      onError: (err) => {
-        const classified = classifyError(err);
+      onError: (error: any) => {
+        const classified = classifyError(error);
         store.setError(classified.userMessage);
-        
-        if (classified.retryable && retryCount < (classified.maxRetries || 3)) {
-          setTimeout(() => {
-            setRetryCount(prev => prev + 1);
-            mutate();
-          }, 1000 * Math.pow(2, retryCount));
-        }
       }
     }
   );
 
-  // Initialize realtime connection
+  // Realtime connection effect - stabilized dependencies
   useEffect(() => {
-    mountedRef.current = true;
-    
-    // Clean up connections on page unload
-    const handleUnload = () => {
-      activeConnections.forEach((manager) => {
-        manager.disconnect();
-      });
-      activeConnections.clear();
-    };
-    
-    if (!roomCode || !userId) return;
-
-    // Check if there's already an active connection for this room
-    const existingManager = activeConnections.get(roomCode);
-    if (existingManager) {
-      console.log('Using existing realtime connection for room:', roomCode);
-      setRealtimeManager(existingManager);
-      realtimeRef.current = existingManager;
-      store.setConnectionStatus('connected');
-      
-      window.addEventListener('beforeunload', handleUnload);
-      return () => {
-        window.removeEventListener('beforeunload', handleUnload);
-      };
+    if (!roomCode || !stableUserInfo.id) {
+      return;
     }
 
-    window.addEventListener('beforeunload', handleUnload);
+    // Prevent multiple concurrent initializations
+    if (initializingRef.current) {
+      console.log('Realtime initialization already in progress, skipping...');
+      return;
+    }
 
     const initRealtime = async () => {
+      // Double-check initialization state
+      if (initializingRef.current) {
+        console.log('Another initialization started during async operation, aborting...');
+        return;
+      }
+
+      initializingRef.current = true;
+
       try {
+        console.log(`Initializing realtime connection for room: ${roomCode}, user: ${stableUserInfo.id}`);
         store.setConnectionStatus('connecting');
         
+        // Clean up any existing manager first
+        if (realtimeManager) {
+          console.log('Cleaning up existing realtime manager...');
+          await realtimeManager.disconnect();
+          setRealtimeManager(null);
+        }
+
+        // Check if still mounted after async operation
+        if (!mountedRef.current) {
+          console.log('Component unmounted during cleanup, aborting initialization...');
+          return;
+        }
+
         const manager = new RoomRealtimeManager(
           roomCode,
-          userId,
-          user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Anonymous'
+          stableUserInfo.id!,
+          stableUserInfo.displayName
         );
 
-        // Set up event listeners
+        // Set up event listeners before connecting
         manager.on('connected', () => {
           if (mountedRef.current) {
+            console.log(`Realtime connected for room: ${roomCode}`);
             store.setConnectionStatus('connected');
             store.clearError();
           }
@@ -114,12 +130,14 @@ export const useRoom = (roomCode: string | null) => {
 
         manager.on('disconnected', () => {
           if (mountedRef.current) {
+            console.log(`Realtime disconnected for room: ${roomCode}`);
             store.setConnectionStatus('disconnected');
           }
         });
 
         manager.on('error', (error: Error) => {
           if (mountedRef.current) {
+            console.error(`Realtime error for room: ${roomCode}`, error);
             const classified = classifyError(error);
             store.setError(classified.userMessage);
             store.setConnectionStatus('error');
@@ -148,11 +166,12 @@ export const useRoom = (roomCode: string | null) => {
         // Handle realtime messages
         manager.on('message', (message) => {
           if (mountedRef.current) {
+            console.log('Received realtime message:', message.type, message);
             store.updateFromRealtime({
               type: message.type,
               payload: message,
               timestamp: new Date().toISOString(),
-              userId: message.userId || userId,
+              userId: stableUserInfo.id!, // Always pass the current receiving user's ID
             });
           }
         });
@@ -160,98 +179,177 @@ export const useRoom = (roomCode: string | null) => {
         // Handle presence updates
         manager.on('presence:sync', (participants) => {
           if (mountedRef.current) {
-            // Update participants based on presence
-            const updatedParticipants = store.participants.map(p => ({
+            console.log('Presence sync:', participants);
+            const currentParticipants = store.participants;
+            const updatedParticipants = currentParticipants.map(p => ({
               ...p,
               isActive: participants.some((pp: any) => pp.userId === p.userId),
             }));
+            
+            // Add any new participants from presence that aren't in store yet
+            participants.forEach((presenceParticipant: any) => {
+              if (!updatedParticipants.find(p => p.userId === presenceParticipant.userId)) {
+                updatedParticipants.push({
+                  userId: presenceParticipant.userId,
+                  userName: presenceParticipant.userName || 'Unknown',
+                  isActive: true,
+                  joinedAt: presenceParticipant.joinedAt || new Date().toISOString(),
+                });
+              }
+            });
+            
             store.setParticipants(updatedParticipants);
+          }
+        });
+
+        manager.on('presence:join', ({ userId: joinedUserId, userName }) => {
+          if (mountedRef.current) {
+            console.log('User joined presence:', joinedUserId, userName);
+            const currentParticipants = store.participants;
+            const existingIndex = currentParticipants.findIndex(p => p.userId === joinedUserId);
+            
+            if (existingIndex >= 0) {
+              const updated = [...currentParticipants];
+              updated[existingIndex] = {
+                ...updated[existingIndex],
+                isActive: true,
+                userName: userName || updated[existingIndex].userName,
+              };
+              store.setParticipants(updated);
+            } else {
+              store.setParticipants([
+                ...currentParticipants,
+                {
+                  userId: joinedUserId,
+                  userName: userName || 'Unknown',
+                  isActive: true,
+                  joinedAt: new Date().toISOString(),
+                }
+              ]);
+            }
+
+            if (joinedUserId !== stableUserInfo.id) {
+              toast({ 
+                title: 'Someone joined',
+                description: `${userName || 'A user'} joined the room`,
+              });
+            }
           }
         });
 
         manager.on('presence:leave', ({ userId: leftUserId }) => {
           if (mountedRef.current) {
-            // Mark user as inactive
+            console.log('User left presence:', leftUserId);
             const updatedParticipants = store.participants.map(p => ({
               ...p,
               isActive: p.userId === leftUserId ? false : p.isActive,
             }));
             store.setParticipants(updatedParticipants);
             
-            if (leftUserId !== userId) {
+            if (leftUserId !== stableUserInfo.id) {
+              const leftUser = store.participants.find(p => p.userId === leftUserId);
               toast({ 
-                title: 'Partner left',
-                description: 'Your partner has left the room',
+                title: 'Someone left',
+                description: `${leftUser?.userName || 'A user'} left the room`,
               });
             }
           }
         });
 
         // Connect
+        console.log(`Attempting to connect realtime manager for room: ${roomCode}`);
         await manager.connect();
         
         if (mountedRef.current) {
-          // Store in global map
-          activeConnections.set(roomCode, manager);
           setRealtimeManager(manager);
-          realtimeRef.current = manager;
+          console.log(`Realtime manager connected and stored for room: ${roomCode}`);
         } else {
           // Component unmounted during connection, clean up
+          console.log('Component unmounted during connection, cleaning up...');
           await manager.disconnect();
         }
 
       } catch (error) {
+        console.error('Failed to initialize realtime connection:', error);
         if (mountedRef.current) {
           const classified = classifyError(error);
           store.setError(classified.userMessage);
           store.setConnectionStatus('error');
           
-          // Don't retry on subscription errors
+          // Only retry on retryable errors, not subscription errors
           const errorMessage = error instanceof Error ? error.message : String(error);
-          if (errorMessage.includes('subscribe multiple times') || 
-              errorMessage.includes('Subscription timeout')) {
-            console.error('Realtime subscription error, not retrying:', error);
-            return;
-          }
-          
-          if (classified.retryable) {
-            // Retry connection with backoff
+          if (!errorMessage.includes('subscribe multiple times') && 
+              !errorMessage.includes('Subscription timeout') &&
+              classified.retryable && retryCount < 3) {
+            console.log(`Retrying realtime connection in 3 seconds... (attempt ${retryCount + 1})`);
             setTimeout(() => {
               if (mountedRef.current) {
+                initializingRef.current = false;
+                setRetryCount(prev => prev + 1);
                 initRealtime();
               }
-            }, 2000);
+            }, 3000);
           }
         }
+      } finally {
+        initializingRef.current = false;
       }
     };
 
     initRealtime();
 
+    // Set up cleanup function
+    cleanupRef.current = async () => {
+      console.log(`useRoom cleanup for room: ${roomCode}`);
+      mountedRef.current = false;
+      initializingRef.current = false;
+      
+      if (realtimeManager) {
+        console.log(`Disconnecting realtime manager for room: ${roomCode}`);
+        await realtimeManager.disconnect();
+        setRealtimeManager(null);
+      }
+    };
+
     // Cleanup
     return () => {
-      mountedRef.current = false;
-      window.removeEventListener('beforeunload', handleUnload);
-      // Don't disconnect if other components might be using it
-      // The connection will be cleaned up when the last component unmounts
+      if (cleanupRef.current) {
+        cleanupRef.current();
+      }
     };
-  }, [roomCode, userId]);
+  }, [roomCode, stableUserInfo.id, stableUserInfo.displayName]); // Use stable user info
+
+  // Reset mounted ref on mount
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  // Memoize store methods to prevent unnecessary re-renders
+  const storeActions = useCallback(() => ({
+    setError: store.setError,
+    setLoading: store.setLoading,
+    clearError: store.clearError,
+    canStartTournament: store.canStartTournament,
+  }), [store.setError, store.setLoading, store.clearError, store.canStartTournament]);
 
   // Join room function
   const joinRoom = useCallback(async () => {
-    if (!roomCode || !userId) {
-      store.setError('You must be signed in to join a room');
+    if (!roomCode || !stableUserInfo.id) {
+      storeActions().setError('You must be signed in to join a room');
       return;
     }
 
     try {
-      store.setLoading(true);
-      store.clearError();
+      storeActions().setLoading(true);
+      storeActions().clearError();
       
       const response = await fetch(`/api/rooms/${roomCode}/join`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify({ userId: stableUserInfo.id }),
       });
       
       if (!response.ok) {
@@ -262,8 +360,7 @@ export const useRoom = (roomCode: string | null) => {
           code: error.code 
         };
       }
-      
-      const data = await response.json();
+
       toast({ 
         title: 'Success!',
         description: 'Successfully joined room!',
@@ -280,16 +377,24 @@ export const useRoom = (roomCode: string | null) => {
           const retryResponse = await fetch(`/api/rooms/${roomCode}/join`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId }),
+            body: JSON.stringify({ userId: stableUserInfo.id }),
           });
+          
           if (!retryResponse.ok) {
             const error = await retryResponse.json();
             throw { status: retryResponse.status, message: error.message };
           }
-          mutate();
+          
+          return retryResponse.json();
         }, classified);
+        
+        toast({ 
+          title: 'Success!',
+          description: 'Successfully joined room!',
+        });
+        mutate();
       } else {
-        store.setError(classified.userMessage);
+        storeActions().setError(classified.userMessage);
         toast({ 
           title: 'Error',
           description: classified.userMessage,
@@ -297,16 +402,16 @@ export const useRoom = (roomCode: string | null) => {
         });
       }
     } finally {
-      store.setLoading(false);
+      storeActions().setLoading(false);
     }
-  }, [roomCode, userId, mutate]);
+  }, [roomCode, stableUserInfo.id, storeActions, toast, mutate]);
 
   // Leave room function
   const leaveRoom = useCallback(async () => {
     if (!roomCode || !user) return;
 
     try {
-      store.setLoading(true);
+      storeActions().setLoading(true);
       
       const response = await fetch(`/api/rooms/${roomCode}/leave`, {
         method: 'DELETE',
@@ -320,6 +425,7 @@ export const useRoom = (roomCode: string | null) => {
       // Disconnect realtime
       if (realtimeManager) {
         await realtimeManager.disconnect();
+        setRealtimeManager(null);
       }
       
       toast({ 
@@ -335,13 +441,13 @@ export const useRoom = (roomCode: string | null) => {
         variant: 'destructive'
       });
     } finally {
-      store.setLoading(false);
+      storeActions().setLoading(false);
     }
-  }, [roomCode, user, realtimeManager]);
+  }, [roomCode, user, realtimeManager, toast, storeActions]);
 
   // Start tournament function
   const startTournament = useCallback(async () => {
-    if (!roomCode || !store.canStartTournament()) {
+    if (!roomCode || !storeActions().canStartTournament()) {
       toast({ 
         title: 'Cannot start',
         description: 'Cannot start tournament. Need exactly 2 participants.',
@@ -351,8 +457,10 @@ export const useRoom = (roomCode: string | null) => {
     }
 
     try {
-      store.setLoading(true);
+      storeActions().setLoading(true);
+      storeActions().clearError();
       
+      console.log('Starting tournament for room:', roomCode);
       const response = await fetch(`/api/rooms/${roomCode}/start`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -360,33 +468,50 @@ export const useRoom = (roomCode: string | null) => {
       
       if (!response.ok) {
         const error = await response.json();
+        console.error('Tournament start failed:', error);
         if (response.status === 400 && error.error?.includes('already active')) {
-          // Attempt idempotent fetch: get latest room state
+          console.log('Room already active, refreshing state...');
           mutate();
+          return;
         }
         throw new Error(error.message || 'Failed to start tournament');
       }
       
       const data = await response.json();
+      console.log('Tournament started successfully:', data);
       toast({ 
         title: 'Tournament started!',
         description: 'Let the games begin! 🎬',
       });
       
-      // Tournament data will be updated via realtime
+      // Tournament data will be updated via realtime events - no need to force refresh
       
     } catch (error: any) {
+      console.error('Error starting tournament:', error);
       const classified = classifyError(error);
-      store.setError(classified.userMessage);
+      storeActions().setError(classified.userMessage);
       toast({ 
         title: 'Error',
         description: classified.userMessage,
         variant: 'destructive'
       });
     } finally {
-      store.setLoading(false);
+      storeActions().setLoading(false);
     }
-  }, [roomCode, store.canStartTournament]);
+  }, [roomCode, storeActions, toast, mutate]);
+
+  // Computed values for backward compatibility
+  const computedValues = useMemo(() => {
+    const activeParticipants = store.participants.filter(p => p.isActive);
+    const isOwner = stableUserInfo.id ? store.room?.ownerId === stableUserInfo.id : false;
+    const canStart = store.canStartTournament();
+    
+    return {
+      activeParticipants,
+      isOwner,
+      canStart,
+    };
+  }, [store.participants, store.room?.ownerId, stableUserInfo.id]);
 
   return {
     // Data
@@ -397,9 +522,9 @@ export const useRoom = (roomCode: string | null) => {
     isLoading: store.isLoading || isLoading,
     
     // Computed
-    isOwner: userId ? store.isOwner(userId) : false,
-    canStart: store.canStartTournament(),
-    activeParticipants: store.participants.filter(p => p.isActive),
+    activeParticipants: computedValues.activeParticipants,
+    isOwner: computedValues.isOwner,
+    canStart: computedValues.canStart,
     
     // Actions
     joinRoom,
@@ -407,7 +532,8 @@ export const useRoom = (roomCode: string | null) => {
     startTournament,
     clearError: store.clearError,
     
-    // Realtime
+    // Utilities
+    refresh: mutate,
     realtimeManager,
   };
 }; 

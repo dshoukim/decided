@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react'
 import { useTournament } from '@/lib/hooks/useTournament'
-import { useTournamentStore } from '@/lib/stores/tournamentStore'
 import { BracketScreen } from './BracketScreen'
 import { WinnerAnnouncement } from './WinnerAnnouncement'
 import { WaitingForPartner } from './WaitingForPartner'
@@ -15,21 +14,30 @@ interface TournamentInterfaceProps {
 }
 
 export function TournamentInterface({ roomCode }: TournamentInterfaceProps) {
-  const { tournament, status, error, isLoading } = useTournament(roomCode)
-  const room = useTournamentStore(state => state.room)
+  const { tournament, status, error, isLoading, totalRounds, currentRound } = useTournament(roomCode)
   const [tournamentState, setTournamentState] = useState<'bracket' | 'final' | 'winner' | 'waiting'>('bracket')
 
   useEffect(() => {
-    if (room?.status === 'completed') {
-      setTournamentState('winner')
-    } else if (tournament?.currentRound === tournament?.totalRounds) {
-      setTournamentState('final')
-    } else if (!tournament) {
-      setTournamentState('waiting')
-    } else {
-      setTournamentState('bracket')
+    // Determine state based on tournament status and final round flag
+    const newState = status === 'completed' ? 'winner' :
+                     tournament?.isFinalRound ? 'final' :
+                     tournament && currentRound === totalRounds ? 'final' :
+                     !tournament ? 'waiting' : 'bracket';
+    
+    if (newState !== tournamentState) {
+      console.log('TournamentInterface state change:', { 
+        from: tournamentState,
+        to: newState,
+        status, 
+        currentRound, 
+        totalRounds,
+        isFinalRound: tournament?.isFinalRound,
+        finalMoviesCount: tournament?.finalMovies?.length,
+        hasError: !!error 
+      });
+      setTournamentState(newState);
     }
-  }, [room?.status, tournament])
+  }, [status, tournament, currentRound, totalRounds, error, tournamentState])
 
   if (isLoading) {
     return (

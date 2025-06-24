@@ -1,0 +1,370 @@
+{
+  "title": "Inception",
+  "url": "https://www.rottentomatoes.com/m/inception",
+  "tomato_meter_score": 91,
+  "audience_score": 87,
+  "critic_reviews": [
+    {
+      "reviewer": "Danilo Castro",
+      "publication": "Next Best Picture",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Apr 11, 2024",
+      "review_text": "Overall, “Inception” is a triumph, a perfectly oiled dream machine that can blow minds on first viewing and satisfy cinephiles on repeat viewings.",
+      "full_review_link": "https://nextbestpicture.com/inception/"
+    },
+    {
+      "reviewer": "Wendy Ide",
+      "publication": "The Times (UK)",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Mar 20, 2024",
+      "review_text": "Nolan is exploring dreams and the possibilities are endless, which is why it’s a little disappointing that so much of the film feels like a generic CGI action movie, albeit a high-class one.",
+      "full_review_link": "https://www.thetimes.co.uk/article/whats-on-tv-and-radio-tonight-wednesday-march-20-3wg7jpprw"
+    },
+    {
+      "reviewer": "Yasser Medina",
+      "publication": "Cinefilia",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Feb 7, 2024",
+      "review_text": "It is, simply put, a cerebral masterpiece from Christopher Nolan. [Full review in Spanish]",
+      "full_review_link": "https://www.cinefilia.blog/2010/10/inception-2010.html"
+    },
+    {
+      "reviewer": "Anushka Halve",
+      "publication": "Film Companion",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Dec 11, 2023",
+      "review_text": "As the corridor spins the characters as well as the audience have to grapple with the blurred boundaries between reality and the subconscious.",
+      "full_review_link": "https://www.filmcompanion.in/fc-lists/five-iconic-corridor-action-sequences-oldboy-animal-ranbir-kapoor"
+    },
+    {
+      "reviewer": "Akhil Arora",
+      "publication": "AkhilArora.com",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Oct 17, 2023",
+      "review_text": "There are thrillers, and then there are thrillers. Gripping every second and couching its pages of exposition in the smartest way possible, Inception is original filmmaking at its finest.",
+      "full_review_link": "https://akhilarora.com/christopher-nolan-movies-ranked/"
+    },
+    {
+      "reviewer": "Don Shanahan",
+      "publication": "Every Movie Has a Lesson",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Sep 4, 2023",
+      "review_text": "\"Inception\" delivers twists that fit the evolving context of the story it's creating and commandingly wins your attention enough to not turn you off.  While it may not seem like it, there is a point and a light at the end of the tunnel to this maze.",
+      "full_review_link": "https://everymoviehasalesson.com/blog/2010/07/movie-review-inception"
+    },
+    {
+      "reviewer": "Brian Eggert",
+      "publication": "Deep Focus Review",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Aug 18, 2023",
+      "review_text": "This film must be revisited, talked about, analyzed, and rewatched again and again. It will surely grow upon each viewing, but it proves instantly enthralling the first time.",
+      "full_review_link": "https://deepfocusreview.com/reviews/inception/"
+    },
+    {
+      "reviewer": "Amy Thomasson",
+      "publication": "InSession Film",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Apr 26, 2023",
+      "review_text": "Fresh, innovative stories told in non-traditional ways...",
+      "full_review_link": "https://insessionfilm.com/how-was-this-not-nominated-for-best-picture-2010/"
+    },
+    {
+      "reviewer": "Jennifer Bisset",
+      "publication": "CNET",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Apr 20, 2023",
+      "review_text": "This is Christopher Nolan's insane, original concept...",
+      "full_review_link": "https://www.cnet.com/culture/entertainment/the-30-best-films-of-the-decade-ranked/"
+    },
+    {
+      "reviewer": "Sean Axmaker",
+      "publication": "Stream on Demand",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Apr 8, 2023",
+      "review_text": "[This] caper film that heists dreams instead of treasure is surely the most cerebral action thriller to become a blockbuster.",
+      "full_review_link": "https://streamondemandathome.com/inception-christopher-nolan-leonardo-dicaprio-dvd-blu-ray-vod/"
+    },
+    {
+      "reviewer": "Vadim Rizov",
+      "publication": "Filmmaker Magazine",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jan 24, 2023",
+      "review_text": "Tech achievements duly noted (and their scale is certainly not nothing), I’m drawn back to Nolan’s 2001 fixation, unveiled to truly embarrassing effect in the dire, airless Inception...",
+      "full_review_link": "https://filmmakermagazine.com/88377-interstellar-christopher-nolans-very-own-2010/#.Y8_4VOzMJ6E"
+    },
+    {
+      "reviewer": "Rene Jordan",
+      "publication": "El Nuevo Herald (Miami)",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Oct 26, 2022",
+      "review_text": "Confusing nightmare.  [Full review in Spanish]",
+      "full_review_link": "https://www.newspapers.com/clip/112067907/inception/"
+    },
+    {
+      "reviewer": "Zoë Rose Bryant",
+      "publication": "Loud and Clear Reviews",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Sep 1, 2022",
+      "review_text": "Inception’s inspiring imagination and ingenious innovation are still as staggering and stimulating today as they were ten years ago.",
+      "full_review_link": "https://loudandclearreviews.com/inception-review-flashback-films/"
+    },
+    {
+      "reviewer": "Keith Garlington",
+      "publication": "Keith & the Movies",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Aug 22, 2022",
+      "review_text": "...a modern cinematic masterpiece.",
+      "full_review_link": "https://keithandthemovies.com/2013/04/16/inception-5-stars/"
+    },
+    {
+      "reviewer": "Fausto Fernandez",
+      "publication": "Fotogramas",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jun 21, 2022",
+      "review_text": "Blows up completely the notion of reality based on an extraordinary overlay of Borgian levels... [Full review in Spanish]",
+      "full_review_link": "https://www.fotogramas.es/peliculas-criticas/a403141/origen/"
+    },
+    {
+      "reviewer": "Fico Cangiano",
+      "publication": "CineXpress Podcast",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "May 6, 2022",
+      "review_text": "Nolan's \"dream within a dream\" heist film, not only keeps you on the edge of your seat with incredible visual effects and memorable action set pieces, but also makes you a part of the puzzle-solving team from beginning to end. [Full review in Spanish]",
+      "full_review_link": "https://cinexpresspr.com/site/2022/05/06/throwback-92-inception/"
+    },
+    {
+      "reviewer": "Steven Hale",
+      "publication": "Nashville Scene",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Sep 13, 2021",
+      "review_text": "It's not nearly as confusing as many make it out to be, but if you do find yourself losing the plot a bit, remember you're at the movies and just let it overwhelm you. That's part of the fun.",
+      "full_review_link": "https://www.nashvillescene.com/arts_culture/coverstory/fall-guide-2021-its-a-heist/article_bd88f430-09e3-11ec-b721-efe9f2bc8b72.html"
+    },
+    {
+      "reviewer": "Taylor Hatmaker",
+      "publication": "Autostraddle",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Jun 9, 2021",
+      "review_text": "Inception engaged on a mainly intellectually level, but that isn't to say that film didn't pack an emotional impact.",
+      "full_review_link": "https://www.autostraddle.com/category/arts-and-entertainment/"
+    },
+    {
+      "reviewer": "Andrea Hubert",
+      "publication": "NME (New Musical Express)",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "May 19, 2021",
+      "review_text": "\"They say we only use a fraction of our brain's potential\" we are told in Inception. The same will never be said of Nolan.",
+      "full_review_link": "https://www.nme.com/reviews/reviews-movie-11438-306239"
+    },
+    {
+      "reviewer": "Ange Anderson",
+      "publication": "Bitch Media",
+      "top_critic": false,
+      "original_score": "",
+      "review_date": "Dec 30, 2020",
+      "review_text": "Inception is an intriguing, frustrating film, but ultimately satisfying.",
+      "full_review_link": "https://www.bitchmedia.org/post/snarkys-cinemachine-five-non-spoilery-things-about-inception"
+    },
+    {
+      "reviewer": "Wendy Ide",
+      "publication": "The Times (UK)",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Mar 20, 2024",
+      "review_text": "Nolan is exploring dreams and the possibilities are endless, which is why it’s a little disappointing that so much of the film feels like a generic CGI action movie, albeit a high-class one.",
+      "full_review_link": "https://www.thetimes.co.uk/article/whats-on-tv-and-radio-tonight-wednesday-march-20-3wg7jpprw"
+    },
+    {
+      "reviewer": "Taylor Hatmaker",
+      "publication": "Autostraddle",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jun 9, 2021",
+      "review_text": "Inception engaged on a mainly intellectually level, but that isn't to say that film didn't pack an emotional impact.",
+      "full_review_link": "https://www.autostraddle.com/category/arts-and-entertainment/"
+    },
+    {
+      "reviewer": "Ange Anderson",
+      "publication": "Bitch Media",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Dec 30, 2020",
+      "review_text": "Inception is an intriguing, frustrating film, but ultimately satisfying.",
+      "full_review_link": "https://www.bitchmedia.org/post/snarkys-cinemachine-five-non-spoilery-things-about-inception"
+    },
+    {
+      "reviewer": "Caryn James",
+      "publication": "Newsday",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Feb 7, 2018",
+      "review_text": "This endlessly fascinating swirl of a film could have come only from Nolan, who blends the cerebral twistiness of Memento (his thriller that moves backward in time) with the spectacular action of his Batman megahit, The Dark Knight.",
+      "full_review_link": "http://www.newsweek.com/inception-christopher-nolans-dreamy-new-movie-74219"
+    },
+    {
+      "reviewer": "Candice Frederick",
+      "publication": "Reel Talk Online",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Sep 11, 2017",
+      "review_text": "Awesome doesn't even begin to describe the sleek, clever, mind-blowing madness that is director Christopher Nolan's aptly titled psychological (read: trippy) thriller Inception.",
+      "full_review_link": "http://www.reeltalkonline.org/2010/07/inception.html"
+    },
+    {
+      "reviewer": "Tom Charity",
+      "publication": "CNN.com",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 20, 2015",
+      "review_text": "A spectacular fantasy thriller based on Nolan's own original screenplay, Inception is the smartest CGI head-trip since The Matrix.",
+      "full_review_link": "http://www.cnn.com/2010/SHOWBIZ/Movies/07/15/inception.review/"
+    },
+    {
+      "reviewer": "Peter Bradshaw",
+      "publication": "Guardian",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 20, 2015",
+      "review_text": "Invention runs lower once we're on those snowy slopes, and the hard narrative punch keeps disintegrating into a floating cloud of pixels. But what a display they make.",
+      "full_review_link": "http://www.theguardian.com/film/2010/jul/15/inception-review"
+    },
+    {
+      "reviewer": "Jonathan Romney",
+      "publication": "Independent on Sunday",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 20, 2015",
+      "review_text": "The film's imaginative freefall is ruinously anchored to a bogus sense of deep feeling.",
+      "full_review_link": ""
+    },
+    {
+      "reviewer": "Leonard Maltin",
+      "publication": "leonardmaltin.com",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 20, 2015",
+      "review_text": "We can only marvel at what writer-director Nolan has thought up and executed so well. But he doesn't know when to stop. Every level leads to another level.",
+      "full_review_link": ""
+    },
+    {
+      "reviewer": "Charlotte O'Sullivan",
+      "publication": "London Evening Standard",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 20, 2015",
+      "review_text": "Inception is the kind of information-packed movie that creates the painful/pleasurable sensation that there's no time to think.",
+      "full_review_link": "http://www.standard.co.uk/goingout/film/lost-in-a-dream-world-in-inception-7420761.html"
+    },
+    {
+      "reviewer": "Jenny McCartney",
+      "publication": "Daily Telegraph (UK)",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 20, 2015",
+      "review_text": "Inception isn't a dud but nor is it a masterpiece. It's like a very ambitious, overlong potboiler: visually beautiful, ingenious in parts and dragging in others.",
+      "full_review_link": "http://www.telegraph.co.uk/culture/film/filmreviews/7892057/Inception-review.html"
+    },
+    {
+      "reviewer": "Kate Muir",
+      "publication": "The Times (UK)",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 20, 2015",
+      "review_text": "Inception is a grown-up thriller ride through the dreamscapes of the mind, with Leonardo DiCaprio in the lead. The movie is a sign that Hollywood retains some intellectual oomph.",
+      "full_review_link": "http://www.thetimes.co.uk/tto/arts/film/reviews/article2645442.ece"
+    },
+    {
+      "reviewer": "Anthony Quinn",
+      "publication": "Independent (UK)",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 20, 2015",
+      "review_text": "The real cause of wonder, though, is why Nolan should have embraced technocratic complexity in the service of such a puny story.",
+      "full_review_link": "http://www.independent.co.uk/arts-entertainment/films/reviews/inception-12a-2027426.html"
+    },
+    {
+      "reviewer": "Ryan Gilbey",
+      "publication": "New Statesman",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 20, 2015",
+      "review_text": "If it's the dreamer whose subconscious fills in the details, as the film claims, why the absence of silliness, sex, horror and general abandon?",
+      "full_review_link": ""
+    },
+    {
+      "reviewer": "Rafer Guzman",
+      "publication": "Newsday",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 20, 2015",
+      "review_text": "A heist film of thrilling, almost delirious complexity.",
+      "full_review_link": "http://www.newsday.com/entertainment/movies/inception-close-to-a-sci-fi-masterpiece-1.2105296"
+    },
+    {
+      "reviewer": "Caryn James",
+      "publication": "Newsweek",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 20, 2015",
+      "review_text": "Even as you tick off the film's overload of references, though -- a Matrix here, a James Bond there -- the amazing effects and Cobb's quest carry you along.",
+      "full_review_link": "http://www.newsweek.com/inception-christopher-nolans-dreamy-new-movie-74219"
+    },
+    {
+      "reviewer": "Perri Nemiroff",
+      "publication": "Shockya.com",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Aug 13, 2010",
+      "review_text": "It's one thing to simply make up a story, but it's another to come up with a scenario and actually make it feel real and that's exactly what Nolan achieves here.",
+      "full_review_link": "http://www.shockya.com/news/2010/07/14/inception-movie-review/"
+    },
+    {
+      "reviewer": "Dwight Brown",
+      "publication": "National Newspaper Publishers Association",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Aug 10, 2010",
+      "review_text": "An always-tense, extremely suspenseful sci-fi action film that respects a viewer's intelligence.",
+      "full_review_link": "http://dwightbrownink.com/inception-12/"
+    },
+    {
+      "reviewer": "Giles Hardie",
+      "publication": "Sydney Morning Herald",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Aug 8, 2010",
+      "review_text": "Intelligent and imaginative Inception is eye bending and mind bending in equal measures.",
+      "full_review_link": "http://www.smh.com.au/entertainment/movies/inception-refreshes-dodgy-old-line-20100809-11rth.html"
+    },
+    {
+      "reviewer": "Jake Wilson",
+      "publication": "The Age (Australia)",
+      "top_critic": true,
+      "original_score": "",
+      "review_date": "Jul 21, 2010",
+      "review_text": "Nolan is having the time of his life in his own personal playground and, for all its heavy technical and narrative machinery, Inception remains one of his lightest films.",
+      "full_review_link": "http://www.theage.com.au/entertainment/movies/type/movie-review"
+    }
+  ],
+  "audience_reviews": [],
+  "scraped_at": "2025-06-24T03:14:45.939Z"
+}

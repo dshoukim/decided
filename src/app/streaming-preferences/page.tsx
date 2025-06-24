@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { supabase } from '@/lib/supabase'
-import { User } from '@supabase/supabase-js'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
+import { useUser } from '@/lib/hooks/useUser'
+import { supabase } from '@/lib/supabase'
 
 interface StreamingService {
   id: number
@@ -16,75 +16,56 @@ interface StreamingService {
 }
 
 export default function StreamingPreferences() {
-  const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const router = useRouter()
+  const { user, isLoading } = useUser()
   const [streamingServices, setStreamingServices] = useState<StreamingService[]>([])
   const [selectedServices, setSelectedServices] = useState<number[]>([])
-  const router = useRouter()
+  const [saving, setSaving] = useState(false)
+  const [failedImages, setFailedImages] = useState<Set<number>>(new Set())
 
   useEffect(() => {
-    // Get current user
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session?.user) {
-        router.push('/')
-        return
-      }
-      
-      setUser(session.user)
+    if (!isLoading && !user) {
+      router.push('/auth/signin')
+      return
+    }
+
+    if (user) {
       loadStreamingServices()
-      loadUserPreferences(session.user.id)
-    })
-
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (!session?.user) {
-        router.push('/')
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [router])
+      loadUserPreferences(user.id)
+    }
+  }, [user, isLoading, router])
 
   const loadStreamingServices = async () => {
     try {
       const response = await fetch('/api/streaming-services')
-      
-      if (!response.ok) {
-        console.error('Error loading streaming services:', response.statusText)
-        setLoading(false)
-        return
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          setStreamingServices(data.data)
+        }
       }
-
-      const data = await response.json()
-      setStreamingServices(data || [])
-      setLoading(false)
     } catch (error) {
       console.error('Error loading streaming services:', error)
-      setLoading(false)
     }
   }
 
   const loadUserPreferences = async (userId: string) => {
     try {
       const response = await fetch(`/api/user-profile?userId=${userId}`)
-      
-      if (!response.ok) {
-        console.error('Error loading user preferences:', response.statusText)
-        return
-      }
-
-      const data = await response.json()
-      
-      if (data.success && data.userData?.streaming_services) {
-        try {
-          // Convert string array back to number array
-          const serviceIds = data.userData.streaming_services.map(Number).filter((id: number) => !isNaN(id))
-          setSelectedServices(serviceIds)
-        } catch (error) {
-          console.error('Error parsing existing streaming services:', error)
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.data.streaming_services) {
+          // Parse the streaming_services field if it's a string
+          try {
+            const services = typeof data.data.streaming_services === 'string' 
+              ? JSON.parse(data.data.streaming_services)
+              : data.data.streaming_services
+            if (Array.isArray(services)) {
+              setSelectedServices(services)
+            }
+          } catch (error) {
+            console.error('Error parsing existing streaming services:', error)
+          }
         }
       }
     } catch (error) {
@@ -100,6 +81,10 @@ export default function StreamingPreferences() {
         return [...prev, serviceId]
       }
     })
+  }
+
+  const handleImageError = (serviceId: number) => {
+    setFailedImages(prev => new Set([...prev, serviceId]))
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -151,7 +136,7 @@ export default function StreamingPreferences() {
     router.push('/')
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
@@ -199,19 +184,14 @@ export default function StreamingPreferences() {
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-12 h-12 relative flex items-center justify-center bg-white rounded-lg shadow-sm">
-                        {service.logo_url ? (
+                        {service.logo_url && !failedImages.has(service.id) ? (
                           <Image
                             src={service.logo_url}
                             alt={`${service.name} logo`}
                             width={40}
                             height={40}
                             className="object-contain"
-                            onError={(e) => {
-                              // Fallback to text if image fails to load
-                              const target = e.target as HTMLImageElement
-                              target.style.display = 'none'
-                              target.parentElement!.innerHTML = `<span class="text-xs font-semibold text-gray-600">${service.name}</span>`
-                            }}
+                            onError={() => handleImageError(service.id)}
                           />
                         ) : (
                           <span className="text-xs font-semibold text-gray-600">{service.name}</span>

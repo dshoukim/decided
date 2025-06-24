@@ -44,7 +44,13 @@ export async function GET(
       return NextResponse.json({ success: false, error: 'Room not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ success: true, room })
+    // Extract tournament data if room is active and has tournament data
+    const response: any = { success: true, room }
+    if (room.status === 'active' && room.tournamentData) {
+      response.tournament = room.tournamentData
+    }
+
+    return NextResponse.json(response)
   } catch (error) {
     console.error('Error getting room:', error)
     return NextResponse.json({ success: false, error: 'Failed to get room' }, { status: 500 })

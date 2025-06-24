@@ -5,10 +5,11 @@ import { subscribeWithSelector } from 'zustand/middleware';
 export interface TournamentMovie {
   id: number;
   title: string;
-  poster_path?: string;
+  posterPath?: string;
   release_date?: string;
   vote_average?: number;
   fromUsers: string[]; // which users had this movie
+  movieData?: any;     // Added: to match tournament engine interface
 }
 
 export interface TournamentMatch {
@@ -24,6 +25,8 @@ export interface Tournament {
   matches: TournamentMatch[];
   currentRound: number;
   currentMatch?: TournamentMatch;
+  isFinalRound?: boolean;
+  finalMovies?: TournamentMovie[];
 }
 
 export interface Participant {
@@ -138,12 +141,18 @@ export const useTournamentStore = create<TournamentStore>()(
       const state = get();
       if (!state.tournament) return null;
       
+      // FIXED: This function is now deprecated in favor of server-side tracking
+      // The useTournament hook now fetches the current match from the server
+      // which properly tracks which specific matches each user has completed
+      
+      console.log('⚠️ getCurrentMatch called - this should be replaced with server-side fetching');
+      
       // Find the next uncompleted match for the current round
       const currentRoundMatches = state.tournament.matches.filter(
         m => m.roundNumber === state.currentRound
       );
       
-      // This would be determined by checking against completed picks
+      // Return first match as fallback (will be overridden by server fetch)
       return currentRoundMatches[0] || null;
     },
     
@@ -198,6 +207,9 @@ export const useTournamentStore = create<TournamentStore>()(
     updateFromRealtime: (message) => {
       const state = get();
       
+      // Get current user ID from message context
+      const currentUserId = message.userId;
+      
       switch (message.type) {
         case 'user_joined':
           // Add or update participant
@@ -243,39 +255,154 @@ export const useTournamentStore = create<TournamentStore>()(
           break;
           
         case 'tournament_started':
-          // Update tournament data
+          // Always update tournament data to ensure consistency between host and guest
+          console.log('Processing tournament_started message:', message.payload);
+          console.log('Current tournament state:', state.tournament?.id);
+          
+          // Transform matchups to proper TournamentMatch structure
+          const matches = message.payload.matchups.map((matchup: any) => ({
+            matchId: matchup.matchId,
+            roundNumber: matchup.roundNumber,
+            movieA: {
+              id: matchup.movieA.id,
+              title: matchup.movieA.title,
+              posterPath: matchup.movieA.poster_path || matchup.movieA.posterPath,
+              fromUsers: [], // Will be populated if needed
+            },
+            movieB: {
+              id: matchup.movieB.id,
+              title: matchup.movieB.title,
+              posterPath: matchup.movieB.poster_path || matchup.movieB.posterPath,
+              fromUsers: [], // Will be populated if needed
+            },
+          }));
+          
+          console.log('Transformed matches with poster paths:', 
+            matches[0] && {
+              movieA: { id: matches[0].movieA.id, title: matches[0].movieA.title, posterPath: matches[0].movieA.posterPath },
+              movieB: { id: matches[0].movieB.id, title: matches[0].movieB.title, posterPath: matches[0].movieB.posterPath }
+            }
+          );
+          
           set({
             tournament: {
               id: message.payload.tournamentId,
               totalRounds: message.payload.totalRounds,
-              matches: message.payload.matchups,
+              matches,
               currentRound: 1,
-              currentMatch: message.payload.matchups[0],
+              currentMatch: matches?.[0],
             },
-            room: state.room ? { ...state.room, status: 'active' } : null,
+            room: state.room?.status !== 'active' && state.room ? 
+              { ...state.room, status: 'active' as const } : state.room,
           });
           break;
           
         case 'pick_made':
-          // Update progress
-          if (message.payload.userId === message.userId) {
-            set({ userProgress: message.payload.progress });
+          // Update progress based on who made the pick
+          const pickUserId = message.payload.userId;
+          console.log('✅ Pick made by user:', pickUserId, 'for match:', message.payload.matchId);
+          console.log('Current user ID:', currentUserId, 'Pick user ID:', pickUserId);
+          
+          if (pickUserId === currentUserId) {
+            // This user made the pick - update their progress
+            console.log('Updating current user progress');
+            set({ userProgress: {
+              completedPicks: message.payload.progress.userPicks,
+              totalPicks: message.payload.progress.totalPicks,
+              currentRound: message.payload.roundNumber,
+              canAdvance: message.payload.progress.userPicks >= message.payload.progress.totalPicks
+            }});
           } else {
-            set({ partnerProgress: message.payload.progress });
+            // Partner made the pick - update partner progress
+            console.log('Updating partner progress');
+            set({ partnerProgress: {
+              completedPicks: message.payload.progress.userPicks,
+              totalPicks: message.payload.progress.totalPicks,
+              currentRound: message.payload.roundNumber,
+              canAdvance: message.payload.progress.userPicks >= message.payload.progress.totalPicks
+            }});
           }
           break;
           
         case 'round_completed':
-          // Advance to next round
-          set({
-            currentRound: message.payload.roundNumber + 1,
-            userProgress: { ...initialProgress, currentRound: message.payload.roundNumber + 1 },
-            partnerProgress: { ...initialProgress, currentRound: message.payload.roundNumber + 1 },
-          });
+          // Advance to next round and update tournament matches
+          console.log('Processing round_completed event:', message.payload);
+          const nextRound = message.payload.roundNumber + 1;
+          
+          set((state) => ({
+            ...state,
+            currentRound: nextRound,
+            tournament: state.tournament ? {
+              ...state.tournament,
+              currentRound: nextRound,
+              matches: message.payload.nextRoundMatchups ? 
+                [...state.tournament.matches, ...message.payload.nextRoundMatchups] :
+                state.tournament.matches
+            } : null,
+            userProgress: { 
+              completedPicks: 0,
+              totalPicks: message.payload.nextRoundMatchups?.length || 0,
+              currentRound: nextRound,
+              canAdvance: false
+            },
+            partnerProgress: { 
+              completedPicks: 0,
+              totalPicks: message.payload.nextRoundMatchups?.length || 0,
+              currentRound: nextRound,
+              canAdvance: false
+            },
+          }));
           break;
           
+        case 'final_round_started':
+          // Transition to final round
+          console.log('Processing final_round_started event:', message.payload);
+          const finalRound = message.payload.roundNumber;
+          
+          set((state) => ({
+            ...state,
+            currentRound: finalRound,
+            tournament: state.tournament ? {
+              ...state.tournament,
+              currentRound: finalRound,
+              matches: message.payload.nextRoundMatchups ? 
+                [...state.tournament.matches, ...message.payload.nextRoundMatchups] :
+                state.tournament.matches,
+              isFinalRound: true,
+              finalMovies: message.payload.finalMovies || []
+            } : null,
+            userProgress: { 
+              completedPicks: 0,
+              totalPicks: message.payload.nextRoundMatchups?.length || 1,
+              currentRound: finalRound,
+              canAdvance: false
+            },
+            partnerProgress: { 
+              completedPicks: 0,
+              totalPicks: message.payload.nextRoundMatchups?.length || 1,
+              currentRound: finalRound,
+              canAdvance: false
+            },
+          }));
+          break;
+
+        case 'tournament_completed':
+          // Tournament is complete with winner
+          console.log('Processing tournament_completed event:', message.payload);
+          set((state) => ({
+            ...state,
+            room: state.room ? {
+              ...state.room,
+              status: 'completed',
+              winnerMovieId: message.payload.winner?.id,
+              winnerTitle: message.payload.winner?.title,
+              winnerPosterPath: message.payload.winner?.posterPath,
+            } : null,
+          }));
+          break;
+
         case 'winner_selected':
-          // Update room with winner
+          // Update room with winner (legacy support)
           set({
             room: state.room ? {
               ...state.room,

@@ -2,6 +2,8 @@ import { createBrowserClient } from '@supabase/ssr'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+// Note: supabase-js v2.x does not support custom Realtime WebSocket URLs directly.
+// To use a tunnel (e.g., ngrok), set NEXT_PUBLIC_SUPABASE_URL to your tunnel's public URL.
 
 export const supabase = createBrowserClient(supabaseUrl, supabaseAnonKey)
 

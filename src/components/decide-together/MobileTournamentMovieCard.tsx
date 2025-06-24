@@ -35,9 +35,9 @@ export function MobileTournamentMovieCard({
       <div className="flex gap-4 p-4">
         {/* Progressive image loading */}
         <div className="relative w-20 h-28 flex-shrink-0 rounded overflow-hidden bg-gray-200 dark:bg-gray-700">
-          {!imageError && movie.poster_path && (
+          {!imageError && movie.posterPath && (
             <img
-              src={`https://image.tmdb.org/t/p/w200${movie.poster_path}`}
+              src={`https://image.tmdb.org/t/p/w200${movie.posterPath}`}
               alt={movie.title}
               loading="lazy"
               onLoad={() => setImageLoaded(true)}
@@ -48,12 +48,12 @@ export function MobileTournamentMovieCard({
               )}
             />
           )}
-          {!imageLoaded && !imageError && movie.poster_path && (
+          {!imageLoaded && !imageError && movie.posterPath && (
             <div className="absolute inset-0 flex items-center justify-center">
               <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
             </div>
           )}
-          {(imageError || !movie.poster_path) && (
+          {(imageError || !movie.posterPath) && (
             <div className="absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800">
               <Film className="h-6 w-6 text-gray-400" />
             </div>

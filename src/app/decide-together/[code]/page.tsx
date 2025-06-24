@@ -195,11 +195,11 @@ export default function RoomPage() {
             <div>
               <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
                 <Users className="h-5 w-5" />
-                Participants ({activeParticipants.length}/2)
+                Participants ({activeParticipants?.length || 0}/2)
               </h3>
               
               <div className="grid gap-4">
-                {participants.map((participant) => (
+                {participants?.map((participant) => (
                   <Card key={participant.userId} className="p-4">
                     <ParticipantAvatar
                       participant={{
@@ -209,10 +209,10 @@ export default function RoomPage() {
                       showName={true}
                     />
                   </Card>
-                ))}
+                )) || []}
                 
                 {/* Empty slot */}
-                {activeParticipants.length < 2 && (
+                {(activeParticipants?.length || 0) < 2 && (
                   <Card className="p-4 border-dashed bg-gray-50 dark:bg-gray-900">
                     <div className="flex items-center gap-3">
                       <div className="h-12 w-12 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
@@ -287,7 +287,7 @@ export default function RoomPage() {
               </div>
             )}
 
-            {!isOwner && activeParticipants.length === 2 && (
+            {!isOwner && (activeParticipants?.length || 0) === 2 && (
               <div className="text-center py-4">
                 <p className="text-gray-600">
                   Waiting for the host to start the tournament...
