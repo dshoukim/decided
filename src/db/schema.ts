@@ -1,4 +1,4 @@
-import { pgTable, text, uuid, timestamp, serial, integer, boolean, jsonb, check, uniqueIndex, index, varchar, unique } from 'drizzle-orm/pg-core'
+import { pgTable, text, uuid, timestamp, serial, integer, boolean, jsonb, check, uniqueIndex, index, varchar, unique, numeric } from 'drizzle-orm/pg-core'
 import { sql } from 'drizzle-orm'
 
 // Users table
@@ -85,7 +85,7 @@ export const streamingServices = pgTable('streaming_services', {
   logoUrl: text('logo_url'),
   websiteUrl: text('website_url'),
   description: text('description'),
-  monthlyPrice: integer('monthly_price').default(0), // Changed from DECIMAL to INTEGER in cents
+  monthlyPrice: numeric('monthly_price', { precision: 10, scale: 2 }), // Keep as decimal like in database
   isActive: boolean('is_active').default(true),
   createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
@@ -95,9 +95,11 @@ export const streamingServices = pgTable('streaming_services', {
 export const genres = pgTable('genres', {
   id: serial('id').primaryKey(),
   name: text('name').notNull().unique(),
+  tmdbId: integer('tmdb_id'),
   description: text('description'),
   icon: text('icon'),
-  color: text('color')
+  color: text('color'),
+  isActive: boolean('is_active').default(true)
 })
 
 // Genre characteristics table
@@ -105,7 +107,9 @@ export const genreCharacteristics = pgTable('genre_characteristics', {
   id: serial('id').primaryKey(),
   genreId: integer('genre_id').notNull().references(() => genres.id, { onDelete: 'cascade' }),
   name: text('name').notNull(),
-  description: text('description')
+  description: text('description'),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow()
 }, (table) => {
   return {
     genreIdIdx: index('idx_genre_characteristics_genre_id').on(table.genreId)
@@ -216,6 +220,7 @@ export const roomParticipants = pgTable('room_participants', {
   finalPickMovieId: integer('final_pick_movie_id'),
   completedMatches: text('completed_matches').array().default(sql`'{}'::text[]`),
   currentMatchIndex: integer('current_match_index').default(0),
+  lastActionAt: timestamp('last_action_at', { withTimezone: true }).defaultNow(),
 }, (table) => ({
   roomUserUnique: unique().on(table.roomId, table.userId),
   roomIdx: index('idx_room_participants_room').on(table.roomId),
@@ -324,4 +329,29 @@ export type NewRoomState = typeof roomStates.$inferInsert;
 export type MatchCompletion = typeof matchCompletions.$inferSelect;
 export type NewMatchCompletion = typeof matchCompletions.$inferInsert;
 export type UserAction = typeof userActions.$inferSelect;
-export type NewUserAction = typeof userActions.$inferInsert; 
+export type NewUserAction = typeof userActions.$inferInsert;
+
+// Tournament State - New unified tournament system
+export const tournamentState = pgTable('tournament_state', {
+  roomId: uuid('room_id').primaryKey().references(() => rooms.id, { onDelete: 'cascade' }),
+  status: varchar('status', { length: 20 }).notNull(),
+  currentRound: integer('current_round').notNull().default(1),
+  totalRounds: integer('total_rounds').notNull(),
+  currentMatches: jsonb('current_matches').notNull().default('[]'),
+  completedPicks: jsonb('completed_picks').notNull().default('[]'),
+  allMovies: jsonb('all_movies').notNull().default('[]'),
+  winnerMovieId: integer('winner_movie_id'),
+  winnerTitle: text('winner_title'),
+  winnerPosterPath: text('winner_poster_path'),
+  version: integer('version').notNull().default(1),
+  createdAt: timestamp('created_at', { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
+}, (table) => ({
+  statusIdx: index('idx_tournament_state_status').on(table.status),
+  roomIdIdx: index('idx_tournament_state_room_id').on(table.roomId),
+  statusCheck: check('tournament_state_status_check', 
+    sql`${table.status} IN ('generating', 'round_1', 'round_2', 'round_3', 'final', 'completed')`)
+}));
+
+export type TournamentState = typeof tournamentState.$inferSelect;
+export type NewTournamentState = typeof tournamentState.$inferInsert; 

@@ -64,7 +64,30 @@ export default function RoomPage() {
   }
 
   const handleStartTournament = async () => {
-    await startTournament()
+    try {
+      const response = await fetch(`/api/rooms/${roomCode}/tournament`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'start' })
+      })
+
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.error || 'Failed to start tournament')
+      }
+
+      // The room status will update via real-time events
+      toast({
+        title: "Tournament starting!",
+        description: "Preparing your personalized tournament...",
+      })
+    } catch (error: any) {
+      toast({
+        title: "Failed to start tournament",
+        description: error.message,
+        variant: "destructive"
+      })
+    }
   }
 
   // Loading state
@@ -125,10 +148,10 @@ export default function RoomPage() {
     )
   }
 
-  // Tournament is active
+  // Tournament is active - use new simplified interface
   if (room?.status === 'active') {
-    const TournamentInterface = dynamic(
-      () => import('@/components/decide-together/TournamentInterface').then(mod => ({ default: mod.TournamentInterface })),
+    const NewTournamentInterface = dynamic(
+      () => import('@/components/decide-together/NewTournamentInterface').then(mod => ({ default: mod.NewTournamentInterface })),
       { 
         loading: () => (
           <div className="container mx-auto max-w-4xl py-12 flex items-center justify-center">
@@ -140,7 +163,7 @@ export default function RoomPage() {
     
     return (
       <div className="container mx-auto py-8">
-        <TournamentInterface roomCode={roomCode} />
+        <NewTournamentInterface roomCode={roomCode} />
       </div>
     )
   }

@@ -1,89 +1,5 @@
 import { relations } from "drizzle-orm/relations";
-import { genres, genreCharacteristics, users, movieRatings, userGenres, watchParties, partyParticipants, partyQueue, partyVotes, rooms, watchList, bracketPicks, roomHistory, roomParticipants, userMovieElo } from "./schema";
-
-export const genreCharacteristicsRelations = relations(genreCharacteristics, ({one}) => ({
-	genre: one(genres, {
-		fields: [genreCharacteristics.genreId],
-		references: [genres.id]
-	}),
-}));
-
-export const genresRelations = relations(genres, ({many}) => ({
-	genreCharacteristics: many(genreCharacteristics),
-	userGenres: many(userGenres),
-}));
-
-export const usersRelations = relations(users, ({many}) => ({
-	rooms: many(rooms),
-	bracketPicks: many(bracketPicks),
-	roomParticipants: many(roomParticipants),
-	userMovieElos: many(userMovieElo),
-	movieRatings: many(movieRatings),
-	watchLists: many(watchList),
-}));
-
-export const movieRatingsRelations = relations(movieRatings, ({one}) => ({
-	user: one(users, {
-		fields: [movieRatings.userId],
-		references: [users.id]
-	}),
-}));
-
-export const userGenresRelations = relations(userGenres, ({one}) => ({
-	genre: one(genres, {
-		fields: [userGenres.genreId],
-		references: [genres.id]
-	}),
-}));
-
-export const partyParticipantsRelations = relations(partyParticipants, ({one}) => ({
-	watchParty: one(watchParties, {
-		fields: [partyParticipants.partyId],
-		references: [watchParties.id]
-	}),
-}));
-
-export const watchPartiesRelations = relations(watchParties, ({many}) => ({
-	partyParticipants: many(partyParticipants),
-	partyQueues: many(partyQueue),
-	partyVotes: many(partyVotes),
-}));
-
-export const partyQueueRelations = relations(partyQueue, ({one}) => ({
-	watchParty: one(watchParties, {
-		fields: [partyQueue.partyId],
-		references: [watchParties.id]
-	}),
-}));
-
-export const partyVotesRelations = relations(partyVotes, ({one}) => ({
-	watchParty: one(watchParties, {
-		fields: [partyVotes.partyId],
-		references: [watchParties.id]
-	}),
-}));
-
-export const watchListRelations = relations(watchList, ({one}) => ({
-	room: one(rooms, {
-		fields: [watchList.decidedTogetherRoomId],
-		references: [rooms.id]
-	}),
-	user: one(users, {
-		fields: [watchList.userId],
-		references: [users.id]
-	}),
-}));
-
-export const roomsRelations = relations(rooms, ({one, many}) => ({
-	watchLists: many(watchList),
-	user: one(users, {
-		fields: [rooms.ownerId],
-		references: [users.id]
-	}),
-	bracketPicks: many(bracketPicks),
-	roomHistories: many(roomHistory),
-	roomParticipants: many(roomParticipants),
-}));
+import { rooms, bracketPicks, users, userActions, matchCompletions, roomStates, roomHistory, userMovieElo, roomParticipants, watchList } from "./schema";
 
 export const bracketPicksRelations = relations(bracketPicks, ({one}) => ({
 	room: one(rooms, {
@@ -96,10 +12,69 @@ export const bracketPicksRelations = relations(bracketPicks, ({one}) => ({
 	}),
 }));
 
+export const roomsRelations = relations(rooms, ({one, many}) => ({
+	bracketPicks: many(bracketPicks),
+	userActions: many(userActions),
+	matchCompletions: many(matchCompletions),
+	roomStates: many(roomStates),
+	roomHistories: many(roomHistory),
+	user: one(users, {
+		fields: [rooms.ownerId],
+		references: [users.id]
+	}),
+	roomParticipants: many(roomParticipants),
+	watchLists: many(watchList),
+}));
+
+export const usersRelations = relations(users, ({many}) => ({
+	bracketPicks: many(bracketPicks),
+	userActions: many(userActions),
+	roomStates: many(roomStates),
+	rooms: many(rooms),
+	userMovieElos: many(userMovieElo),
+	roomParticipants: many(roomParticipants),
+}));
+
+export const userActionsRelations = relations(userActions, ({one}) => ({
+	room: one(rooms, {
+		fields: [userActions.roomId],
+		references: [rooms.id]
+	}),
+	user: one(users, {
+		fields: [userActions.userId],
+		references: [users.id]
+	}),
+}));
+
+export const matchCompletionsRelations = relations(matchCompletions, ({one}) => ({
+	room: one(rooms, {
+		fields: [matchCompletions.roomId],
+		references: [rooms.id]
+	}),
+}));
+
+export const roomStatesRelations = relations(roomStates, ({one}) => ({
+	room: one(rooms, {
+		fields: [roomStates.roomId],
+		references: [rooms.id]
+	}),
+	user: one(users, {
+		fields: [roomStates.updatedBy],
+		references: [users.id]
+	}),
+}));
+
 export const roomHistoryRelations = relations(roomHistory, ({one}) => ({
 	room: one(rooms, {
 		fields: [roomHistory.roomId],
 		references: [rooms.id]
+	}),
+}));
+
+export const userMovieEloRelations = relations(userMovieElo, ({one}) => ({
+	user: one(users, {
+		fields: [userMovieElo.userId],
+		references: [users.id]
 	}),
 }));
 
@@ -114,9 +89,9 @@ export const roomParticipantsRelations = relations(roomParticipants, ({one}) => 
 	}),
 }));
 
-export const userMovieEloRelations = relations(userMovieElo, ({one}) => ({
-	user: one(users, {
-		fields: [userMovieElo.userId],
-		references: [users.id]
+export const watchListRelations = relations(watchList, ({one}) => ({
+	room: one(rooms, {
+		fields: [watchList.decidedTogetherRoomId],
+		references: [rooms.id]
 	}),
 }));
