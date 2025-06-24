@@ -66,7 +66,7 @@ export const watchList = pgTable('watch_list', {
   updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow()
 }, (table) => {
   return {
-    addedFromCheck: check('added_from_check', sql`${table.addedFrom} IN ('survey', 'search', 'manual', 'decided_together')`),
+    addedFromCheck: check('added_from_check', sql`${table.addedFrom} IN ('survey', 'search', 'manual', 'decided_together', 'explore')`),
     userMovieUnique: uniqueIndex('idx_watch_list_user_movie').on(table.userId, table.tmdbMovieId),
     userIdIdx: index('idx_watch_list_user_id').on(table.userId),
     tmdbIdIdx: index('idx_watch_list_tmdb_id').on(table.tmdbMovieId),

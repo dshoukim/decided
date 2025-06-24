@@ -159,7 +159,7 @@ export default function ExplorePage() {
     if (!user?.id) return
 
     try {
-      const response = await fetch('/api/populate-watch-list', {
+      const response = await fetch('/api/watch-list', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -168,17 +168,29 @@ export default function ExplorePage() {
           userId: user.id,
           tmdbMovieId: movie.id,
           movieTitle: movie.title,
-          movieData: movie,
+          movieData: {
+            poster_path: movie.poster_path,
+            poster_url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`,
+            overview: movie.overview,
+            release_date: movie.release_date,
+            vote_average: movie.vote_average,
+            vote_count: movie.vote_count
+          },
           userNote: note || null,
+          addedFrom: 'explore'
         }),
       })
 
       const data = await response.json()
       if (data.success) {
         await loadWatchList() // Refresh watchlist
+      } else {
+        console.error('Failed to add to watchlist:', data.error)
+        alert(data.error || 'Failed to add movie to watchlist')
       }
     } catch (error) {
       console.error('Error adding to watchlist:', error)
+      alert('Failed to add movie to watchlist')
     }
   }
 
